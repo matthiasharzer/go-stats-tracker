@@ -1,4 +1,4 @@
-module github.com/username/template
+module github.com/matthiasharzer/go-stats-tracker
 
 go 1.26.5
 
