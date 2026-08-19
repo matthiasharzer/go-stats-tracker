@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 
+	"github.com/matthiasharzer/go-stats-tracker/tracker"
 	"github.com/spf13/cobra"
 
 	"github.com/matthiasharzer/go-stats-tracker/analyzer/tesseract"
@@ -19,6 +20,8 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to create analyzer: %w", err)
 		}
 
+		statsTracker := tracker.NewStatsTracker(analyzer)
+
 		file, err := os.Open("test.png")
 		if err != nil {
 			return fmt.Errorf("failed to open file: %w", err)
@@ -30,9 +33,9 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to read file: %w", err)
 		}
 
-		_, err = analyzer.ExtractPlayerXP(imageBytes)
+		err = statsTracker.Submit(imageBytes)
 		if err != nil {
-			return fmt.Errorf("failed to extract player XP: %w", err)
+			return fmt.Errorf("failed to submit image: %w", err)
 		}
 
 		return nil
