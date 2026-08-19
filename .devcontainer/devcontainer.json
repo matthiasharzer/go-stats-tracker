@@ -1,0 +1,16 @@
+{
+  "name": "Go with Gosseract",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "remoteEnv": {
+    "CGO_ENABLED": "1"
+  },
+  "customizations": {
+    "jetbrains": {
+      "backend": "GoLand"
+    }
+  },
+  "remoteUser": "vscode",
+  "postCreateCommand": "go mod download"
+}
