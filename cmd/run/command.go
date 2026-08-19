@@ -8,7 +8,7 @@ import (
 
 	"github.com/matthiasharzer/go-stats-tracker/analyzer/tesseract"
 	"github.com/matthiasharzer/go-stats-tracker/logging"
-	"github.com/matthiasharzer/go-stats-tracker/persistence/inmemory"
+	"github.com/matthiasharzer/go-stats-tracker/persistence/sqlite"
 	"github.com/matthiasharzer/go-stats-tracker/tracker"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
@@ -43,6 +43,7 @@ func getGoogleOauthConfig() (*oauth2.Config, error) {
 
 var httpPort int
 var httpHost string
+var dbFile string
 
 func init() {
 	Command.Flags().IntVarP(&httpPort, "port", "p", 4000, "The HTTP server port to listen on")
@@ -58,14 +59,17 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to create analyzer: %w", err)
 		}
 
-		statsTracker := tracker.NewStatsTracker(analyzer)
-
 		oauthConfig, err := getGoogleOauthConfig()
 		if err != nil {
 			return fmt.Errorf("failed to get oauth config: %w", err)
 		}
 
-		database := inmemory.NewDatabase()
+		database, err := sqlite.NewDatabase(".dev/db.sqlite")
+		if err != nil {
+			return fmt.Errorf("failed to create database: %w", err)
+		}
+
+		statsTracker := tracker.NewStatsTracker(analyzer, database, *oauthConfig)
 
 		mux := getMux(*oauthConfig, database)
 
@@ -80,7 +84,7 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to read file: %w", err)
 		}
 
-		err = statsTracker.Submit(imageBytes)
+		err = statsTracker.Submit("ab92b5e8-6b95-4157-ae8f-04ce65ce271a", imageBytes)
 		if err != nil {
 			return fmt.Errorf("failed to submit image: %w", err)
 		}

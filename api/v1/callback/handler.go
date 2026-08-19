@@ -55,6 +55,8 @@ func Handler(sharedState *api.SharedState, oauth oauth2.Config, database persist
 			return
 		}
 
+		logging.Info("save user context", "user_id", userID, "sheet_id", sheetID)
+
 		response := fmt.Sprintf("Success! Your User ID is: %s\n\nUse this ID to authenticate when uploading screenshots", userID)
 		_, err = w.Write([]byte(response))
 		if err != nil {

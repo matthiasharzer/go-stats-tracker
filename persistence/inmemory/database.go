@@ -18,19 +18,27 @@ func NewDatabase() persistence.Database {
 	}
 }
 
-func (d *Database) Lookup(key string) *persistence.UserContext {
+func (d *Database) Lookup(userID string) (*persistence.UserContext, error) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	userContext, ok := d.m[key]
+	userContext, ok := d.m[userID]
 	if !ok {
-		return nil
+		return nil, nil
 	}
-	return &userContext
+	return &userContext, nil
 }
 
-func (d *Database) Save(key string, value persistence.UserContext) error {
+func (d *Database) Save(userID string, value persistence.UserContext) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.m[key] = value
+	d.m[userID] = value
 	return nil
+}
+
+func (d *Database) Exists(userID string) (bool, error) {
+	userContext, err := d.Lookup(userID)
+	if err != nil {
+		return false, err
+	}
+	return userContext != nil, nil
 }

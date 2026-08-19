@@ -6,6 +6,7 @@ type UserContext struct {
 }
 
 type Database interface {
-	Lookup(key string) *UserContext
-	Save(key string, userContext UserContext) error
+	Lookup(userID string) (*UserContext, error)
+	Save(userID string, userContext UserContext) error
+	Exists(userID string) (bool, error)
 }
