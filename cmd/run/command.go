@@ -45,7 +45,8 @@ var dbFile string
 
 func init() {
 	Command.Flags().IntVarP(&httpPort, "port", "p", 4000, "The HTTP server port to listen on")
-	Command.Flags().StringVarP(&httpHost, "host", "", "", "The HTTP server host (default: all interfaces)")
+	Command.Flags().StringVarP(&httpHost, "host", "h", "", "The HTTP server host (default: all interfaces)")
+	Command.Flags().StringVarP(&dbFile, "database-file", "d", "data/db.sqlite", "The database file to use")
 }
 
 var Command = &cobra.Command{
@@ -62,7 +63,7 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to get oauth config: %w", err)
 		}
 
-		database, err := sqlite.NewDatabase(".dev/db.sqlite")
+		database, err := sqlite.NewDatabase(dbFile)
 		if err != nil {
 			return fmt.Errorf("failed to create database: %w", err)
 		}
