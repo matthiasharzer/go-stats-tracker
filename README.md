@@ -12,26 +12,26 @@ A personal user XP tracker based on screenshots using Tesseract.
 This project connects to the Google Sheets API using OAuth 2.0. To use it, you need to create a Google Cloud project and set up an OAuth 2.0 client.
 1. Create a project in the [Google Cloud Console](https://console.cloud.google.com/).
 2. Navigate to "APIs & Services" > "Credentials" and click "Create Credentials" > "OAuth client ID".
-3. Select "Web application" as the application type and set the redirect URI to `<YOUR_REDIRECT_URL_HOST>/api/v1/callback`.
+3. Select "Web application" as the application type and set the redirect URI to `<YOUR_REDIRECT_URL>/api/v1/callback`.
 4. Note down the `Client ID` and `Client Secret` for later use.
 5. Enable the Google Sheets API for your project by navigating to "APIs & Services" > "Library" and searching for "Google Sheets API". Click "Enable".
 6. Add the `https://www.googleapis.com/auth/spreadsheets` scope to your OAuth consent screen by navigating to "APIs & Services" > "OAuth consent screen" > "Data Access".
 
 ### Docker (recommended)
 
-The easiest way to run the proxy is with Docker. A pre-built image is available on the [GitHub Container Registry](https://ghcr.io/matthiasharzer/go-stats-tracker).
+The easiest way to run the application is with Docker. A pre-built image is available on the [GitHub Container Registry](https://ghcr.io/matthiasharzer/go-stats-tracker).
 
 
 Create an `.env` file with the following content, using the `Client ID`, `Client Secret`, and redirect URL you obtained from the Google Cloud Console:
 ```env
-REDIRECT_URL=<YOUR_REDIRECT_URL_HOST>/api/v1/callback
+REDIRECT_URL=<YOUR_REDIRECT_URL>/api/v1/callback
 CLIENT_ID=<YOUR_CLIENT_ID>
 CLIENT_SECRET=<YOUR_CLIENT_SECRET>
 ```
 
 Run the following command to start the application on port 4000:
 ```bash
-docker run --env-file .env -p 4000:4000 ghcr.io/matthiasharzer/go-stats-tracker:latest run -p 4000 -d /app/data/db.sqlite3
+docker run --env-file .env -p 4000:4000 ghcr.io/matthiasharzer/go-stats-tracker:latest run -p 4000 -d data/db.sqlite3
 ```
 
 > [!IMPORTANT]
@@ -71,11 +71,11 @@ Requires the following environment variables to be set:
 
 Command line arguments:
 
-| Argument                 | Required | Default                 | Descritpion                                                     |
-|--------------------------|----------|-------------------------|-----------------------------------------------------------------|
-| `--port` / `-p`          | ❌       | `4000`                  | The port to start the HTTP-server on                            |
-| `--host`                 | ❌       | `""` _(all interfaces)_ | The host to start the HTTP-server on                            |
-| `--database-file` / `-d` | ❌       | `data/db.sqlite`        | The location of the databse file where user context is saved in |	
+| Argument                 | Required | Default                 | Description                                                      |
+|--------------------------|----------|-------------------------|------------------------------------------------------------------|
+| `--port` / `-p`          | ❌       | `4000`                  | The port to start the HTTP-server on                             |
+| `--host`                 | ❌       | `""` _(all interfaces)_ | The host to start the HTTP-server on                             |
+| `--database-file` / `-d` | ❌       | `data/db.sqlite`        | The location of the database file where user context is saved in |	
 
 ### Server Endpoints
 
