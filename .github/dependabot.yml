@@ -64,3 +64,24 @@ updates:
         update-types:
           - minor
           - patch
+
+  - package-ecosystem: "docker"
+    directory: ".devcontainer/"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    assignees:
+      - matthiasharzer
+    labels:
+      - Dependencies
+    commit-message:
+      prefix: chore
+    groups:
+      docker:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
