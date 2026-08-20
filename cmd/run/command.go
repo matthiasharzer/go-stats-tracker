@@ -45,7 +45,7 @@ var dbFile string
 
 func init() {
 	Command.Flags().IntVarP(&httpPort, "port", "p", 4000, "The HTTP server port to listen on")
-	Command.Flags().StringVarP(&httpHost, "host", "h", "", "The HTTP server host (default: all interfaces)")
+	Command.Flags().StringVarP(&httpHost, "host", "", "", "The HTTP server host (default: all interfaces)")
 	Command.Flags().StringVarP(&dbFile, "database-file", "d", "data/db.sqlite", "The database file to use")
 }
 

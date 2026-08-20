@@ -25,7 +25,7 @@ FROM alpine:3.24
 RUN apk add --no-cache \
     ca-certificates \
     tesseract-ocr \
-    tesseract-ocr-data-eng \
+    tesseract-ocr-data-eng
 
 RUN addgroup -S app && adduser -S -G app app
 
@@ -33,6 +33,7 @@ COPY --from=build /go/bin/go-stats-tracker /usr/local/bin/go-stats-tracker
 
 WORKDIR /var/lib/go-stats-tracker
 RUN chown app:app /var/lib/go-stats-tracker
+RUN mkdir -p /app/data && chown app:app /app/data
 
 USER app
 
