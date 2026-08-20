@@ -18,6 +18,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 5
+    env:
+      CGO_ENABLED: 1
 
     steps:
       - name: Clone repository
