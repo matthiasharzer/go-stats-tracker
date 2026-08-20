@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/matthiasharzer/go-stats-tracker/persistence"
@@ -61,6 +62,9 @@ func (d *Database) Lookup(userID string) (*persistence.UserContext, error) {
 	var googleRefreshToken, targetSpreadsheetID string
 	err = row.Scan(&googleRefreshToken, &targetSpreadsheetID)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("failed to scan row: %w", err)
 	}
 

@@ -5,8 +5,6 @@ import (
 
 	"github.com/matthiasharzer/go-stats-tracker/api"
 	"github.com/matthiasharzer/go-stats-tracker/logging"
-)
-import (
 	"golang.org/x/oauth2"
 )
 

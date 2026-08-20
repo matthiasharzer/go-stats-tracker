@@ -3,7 +3,7 @@ package timeutils
 import "time"
 
 func TodayDate() time.Time {
-	now := time.Now()
+	now := time.Now().UTC()
 	return time.Date(
 		now.Year(),
 		now.Month(),

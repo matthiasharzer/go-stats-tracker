@@ -76,8 +76,14 @@ func parseRow(rowValues []any, currentRowNumber int) (row, error) {
 		return row{}, fmt.Errorf("failed to parse date")
 	}
 	date := ParseSheetsSerial(dateSerial)
-	level := rowValues[1].(float64)
-	xp := rowValues[2].(float64)
+	level, ok := rowValues[1].(float64)
+	if !ok {
+		return row{}, fmt.Errorf("failed to parse level")
+	}
+	xp, ok := rowValues[2].(float64)
+	if !ok {
+		return row{}, fmt.Errorf("failed to parse xp")
+	}
 	return row{
 		date: cell[time.Time]{
 			column: TargetRange.from.column,

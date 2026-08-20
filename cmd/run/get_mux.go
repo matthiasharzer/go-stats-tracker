@@ -12,7 +12,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func getMux(oath oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker) *http.ServeMux {
+func getMux(oauth oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker) *http.ServeMux {
 	sharedState := api.NewSharedState()
 
 	mux := http.NewServeMux()
@@ -21,8 +21,8 @@ func getMux(oath oauth2.Config, database persistence.Database, tracker *tracker.
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	mux.HandleFunc("GET /api/v1/register", register.Handler(sharedState, oath))
-	mux.HandleFunc("GET /api/v1/callback", callback.Handler(sharedState, oath, database))
+	mux.HandleFunc("GET /api/v1/register", register.Handler(sharedState, oauth))
+	mux.HandleFunc("GET /api/v1/callback", callback.Handler(sharedState, oauth, database))
 	mux.HandleFunc("POST /api/v1/ingest/{userID}", ingest.Handler(tracker))
 
 	return mux
