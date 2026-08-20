@@ -52,7 +52,7 @@ func Handler(database persistence.Database, tracker *tracker.StatsTracker) http.
 		limitedReader := http.MaxBytesReader(w, r.Body, int64(fileSizeLimit))
 		fileContent, err := io.ReadAll(limitedReader)
 		if err != nil {
-			logging.Debug("failed to read request body", "error", err, "userID", userID)
+			logging.Warn("failed to read request body", "error", err, "userID", userID)
 			http.Error(w, "failed to read request body", http.StatusBadRequest)
 			return
 		}
@@ -61,7 +61,7 @@ func Handler(database persistence.Database, tracker *tracker.StatsTracker) http.
 
 		err = tracker.Submit(*userContext, fileContent, today)
 		if err != nil {
-			logging.Debug("failed to submit stats", "error", err, "userID", userID)
+			logging.Warn("failed to submit stats", "error", err, "userID", userID)
 			http.Error(w, "failed to submit stats", http.StatusBadRequest)
 			return
 		}

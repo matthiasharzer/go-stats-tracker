@@ -51,6 +51,7 @@ func Handler(sharedState *api.SharedState, oauth oauth2.Config, database persist
 			TargetSpreadsheetID: sheetID,
 		})
 		if err != nil {
+			logging.Error("failed to save tokens to database", "err", err)
 			http.Error(w, "Failed to save tokens to database", http.StatusInternalServerError)
 			return
 		}

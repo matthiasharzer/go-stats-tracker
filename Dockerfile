@@ -34,8 +34,7 @@ RUN addgroup -g 1000 app && adduser -u 1000 -G app -D app
 COPY --from=build /go/bin/go-stats-tracker /usr/local/bin/go-stats-tracker
 
 WORKDIR /var/lib/go-stats-tracker
-RUN chown app:app /var/lib/go-stats-tracker
-RUN mkdir -p /app/data && chown app:app /app/data
+RUN mkdir -p /var/lib/go-stats-tracker/data && chown -R app:app /var/lib/go-stats-tracker
 
 USER app
 
