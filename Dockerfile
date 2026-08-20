@@ -25,7 +25,8 @@ FROM alpine:3.24
 RUN apk add --no-cache \
     ca-certificates \
     tesseract-ocr \
-    tesseract-ocr-data-eng
+    tesseract-ocr-data-eng \
+    tesseract-ocr-data-deu
 
 RUN addgroup -S app && adduser -S -G app app
 
