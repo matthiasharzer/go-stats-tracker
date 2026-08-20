@@ -140,8 +140,6 @@ func (s *Service) parseExistingRows(srv *sheets.Service, spreadsheetID string) (
 	return rows, nil
 }
 
-//func addRow(srv *sheets.Service, spreadsheetID string, date time.Time, xp int64)
-
 func (s *Service) setRow(srv *sheets.Service, spreadsheetID string, dateCell cell[time.Time], level int, xp int64) error {
 	targetRange := cellRange{
 		from: cell[any]{
@@ -228,9 +226,6 @@ func (s *Service) AppendStats(userContext persistence.UserContext, stats analyze
 	rows, err := s.parseExistingRows(srv, userContext.TargetSpreadsheetID)
 	if err != nil {
 		return fmt.Errorf("failed to parse existing rows: %w", err)
-	}
-	if len(rows) == 0 {
-		return fmt.Errorf("empty rows no supported yet")
 	}
 
 	updateContext, err := s.resolveUpdateContext(rows, date)
