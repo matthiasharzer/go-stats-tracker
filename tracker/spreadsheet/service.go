@@ -237,9 +237,11 @@ func (s *Service) AppendStats(userContext persistence.UserContext, stats analyze
 	playerLevel := updateContext.defaultPlayerLevel
 	if stats.Level != 0 {
 		playerLevel = stats.Level
+	} else {
+		logging.Warn("player stats do not include level, using default player level", "defaultPlayerLevel", playerLevel)
 	}
 
-	logging.Info("writing row", "spreadsheetID", userContext.TargetSpreadsheetID, "date", dateCell.value.Format("2006-01-02"), "dateCell", dateCell.format(), "level", stats.Level, "xp", stats.GainedLevelXP)
+	logging.Info("writing row", "spreadsheetID", userContext.TargetSpreadsheetID, "date", dateCell.value.Format("2006-01-02"), "dateCell", dateCell.format(), "level", playerLevel, "xp", stats.GainedLevelXP)
 	err = s.setRow(srv, userContext.TargetSpreadsheetID, dateCell, playerLevel, stats.GainedLevelXP)
 	if err != nil {
 		return fmt.Errorf("failed to set row: %w", err)
