@@ -30,7 +30,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     needs: get-next-version
     env:
       CGO_ENABLED: 1
