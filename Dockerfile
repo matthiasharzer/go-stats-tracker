@@ -1,9 +1,10 @@
-FROM golang:1.26.5-alpine3.24 AS build
+FROM golang:1.26.5-alpine AS build
 
 ARG version=unknown
 
-RUN apk update && \
-		apk add git
+RUN apk add --no-cache \
+    build-base \
+    tesseract-ocr-dev
 
 WORKDIR /go/src
 
@@ -14,12 +15,18 @@ RUN go mod download && \
 COPY . .
 
 RUN module_path=$(go list -m) && \
-	go build \
+    CGO_ENABLED=1 go build \
 		-o /go/bin/go-stats-tracker \
 		-ldflags "-X ${module_path}/cmd/version.version=$version" \
 		.
 
 FROM alpine:3.24
+
+RUN apk add --no-cache \
+    ca-certificates \
+    tesseract-ocr \
+    tesseract-ocr-data-eng \
+    tesseract-ocr-data-deu
 
 RUN addgroup -S app && adduser -S -G app app
 
@@ -27,6 +34,7 @@ COPY --from=build /go/bin/go-stats-tracker /usr/local/bin/go-stats-tracker
 
 WORKDIR /var/lib/go-stats-tracker
 RUN chown app:app /var/lib/go-stats-tracker
+RUN mkdir -p /app/data && chown app:app /app/data
 
 USER app
 

@@ -13,11 +13,10 @@ concurrency:
 jobs:
   qa:
     name: QA
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      CGO_ENABLED: 1
 
     steps:
       - name: Clone repository
@@ -26,6 +25,15 @@ jobs:
         uses: actions/setup-go@v7.0.0
         with:
           go-version-file: ./go.mod
+      - name: Install Tesseract
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install --no-install-recommends \
+            libtesseract-dev \
+            libleptonica-dev \
+            tesseract-ocr-eng \
+            tesseract-ocr-deu \
+            tesseract-ocr
       - name: Run QA
         run: |
           make qa

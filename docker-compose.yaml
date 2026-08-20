@@ -1,0 +1,14 @@
+services:
+  pokemon-go-stats-tracker:
+    image: ghcr.io/matthiasharzer/go-stats-tracker:latest
+    container_name: pokemon-go-stats-tracker
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    command: run -p 4000 -d /app/data/db.sqlite3
+    environment:
+      REDIRECT_URL: "<YOUR_REDIRECT_URL_HOST>/api/v1/callback"
+      CLIENT_ID: "YOUR_CLIENT_ID"
+      CLIENT_SECRET: "YOUR_CLIENT_SECRET"
+    volumes:
+      - ./data:/app/data
