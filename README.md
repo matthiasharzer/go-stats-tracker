@@ -93,5 +93,12 @@ The server exposes the following endpoints:
 
 The application currently expects a specific spreadsheet template to be used. You can find the template [here](https://docs.google.com/spreadsheets/d/1ls99T0X2Dy3nMDzR695GSkmfhdjUaF--T71CFu6zNQg/edit).
 
+### Tracking Screenshots (Android only)
+
+To automatically submit screenshots made from the Pokémon Go app, you can use [Automate](https://llamalab.com/automate/) to create a flow that detects new screenshots and sends them to the server. 
+The [AutomateTemplate.flo](./AutomateTemplate.flo) file contains a sample flow that may be used as a starting point. You will need to adjust the flow depending on your device/android capabilities and need to configure the server URL and user ID in the flow.
+
+There may be other ways to automatically submit screenshots, but this is the only method that has been tested and confirmed to work.
+
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details
