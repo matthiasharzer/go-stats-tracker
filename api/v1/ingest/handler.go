@@ -6,29 +6,42 @@ import (
 
 	"github.com/docker/go-units"
 	"github.com/matthiasharzer/go-stats-tracker/logging"
+	"github.com/matthiasharzer/go-stats-tracker/persistence"
 	"github.com/matthiasharzer/go-stats-tracker/tracker"
 	"github.com/matthiasharzer/go-stats-tracker/utils/timeutils"
 )
 
 const fileSizeLimit = 10 * units.MiB
 
-func Handler(tracker *tracker.StatsTracker) http.HandlerFunc {
+func Handler(database persistence.Database, tracker *tracker.StatsTracker) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
-			logging.Warn("method not allowed")
+			logging.Debug("method not allowed")
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
 		}
 
 		userID := r.PathValue("userID")
 		if userID == "" {
-			logging.Warn("missing userID in request path")
+			logging.Debug("missing userID in request path")
 			http.Error(w, "userID is required", http.StatusBadRequest)
 			return
 		}
 
+		userContext, err := database.Lookup(userID)
+		if err != nil {
+			logging.Debug("failed to lookup user", "error", err, "userID", userID)
+			http.Error(w, "failed to lookup user", http.StatusInternalServerError)
+			return
+		}
+		if userContext == nil {
+			logging.Debug("user not found", "userID", userID)
+			http.Error(w, "user not found", http.StatusNotFound)
+			return
+		}
+
 		if r.Body == nil {
-			logging.Warn("missing request body in request", "userID", userID)
+			logging.Debug("missing request body in request", "userID", userID)
 			http.Error(w, "missing request body", http.StatusBadRequest)
 			return
 		}
@@ -39,19 +52,23 @@ func Handler(tracker *tracker.StatsTracker) http.HandlerFunc {
 		limitedReader := http.MaxBytesReader(w, r.Body, int64(fileSizeLimit))
 		fileContent, err := io.ReadAll(limitedReader)
 		if err != nil {
-			logging.Warn("failed to read request body", "error", err, "userID", userID)
+			logging.Debug("failed to read request body", "error", err, "userID", userID)
 			http.Error(w, "failed to read request body", http.StatusBadRequest)
 			return
 		}
 
 		today := timeutils.TodayDate()
 
-		err = tracker.Submit(userID, fileContent, today)
+		err = tracker.Submit(*userContext, fileContent, today)
 		if err != nil {
-			logging.Warn("failed to submit stats", "error", err, "userID", userID)
+			logging.Debug("failed to submit stats", "error", err, "userID", userID)
 			http.Error(w, "failed to submit stats", http.StatusBadRequest)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
+		_, err = w.Write([]byte("OK"))
+		if err != nil {
+			logging.Error("failed to write response", "error", err, "userID", userID)
+		}
 	}
 }

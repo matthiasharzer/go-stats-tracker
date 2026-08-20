@@ -23,7 +23,7 @@ func getMux(oauth oauth2.Config, database persistence.Database, tracker *tracker
 
 	mux.HandleFunc("GET /api/v1/register", register.Handler(sharedState, oauth))
 	mux.HandleFunc("GET /api/v1/callback", callback.Handler(sharedState, oauth, database))
-	mux.HandleFunc("POST /api/v1/ingest/{userID}", ingest.Handler(tracker))
+	mux.HandleFunc("POST /api/v1/ingest/{userID}", ingest.Handler(database, tracker))
 
 	return mux
 }
