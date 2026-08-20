@@ -36,6 +36,7 @@ func (s *StatsTracker) Submit(userID string, imageData []byte, date time.Time) e
 
 	stats, err := s.analyzer.ExtractPlayerStats(imageData)
 	if err != nil {
+		logging.Error("failed to extract player stats", "err", err)
 		return fmt.Errorf("failed to extract player XP: %w", err)
 	}
 
