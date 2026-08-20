@@ -10,6 +10,7 @@ import (
 	"github.com/matthiasharzer/go-stats-tracker/logging"
 	"github.com/matthiasharzer/go-stats-tracker/persistence/sqlite"
 	"github.com/matthiasharzer/go-stats-tracker/tracker"
+	"github.com/matthiasharzer/go-stats-tracker/utils/timeutils"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -35,9 +36,8 @@ func getGoogleOauthConfig() (*oauth2.Config, error) {
 		RedirectURL:  redirectURL,
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		// This MUST match exactly what you added in the GCP Console
-		Scopes:   []string{"https://www.googleapis.com/auth/spreadsheets"},
-		Endpoint: google.Endpoint,
+		Scopes:       []string{"https://www.googleapis.com/auth/spreadsheets"},
+		Endpoint:     google.Endpoint,
 	}, nil
 }
 
@@ -84,7 +84,7 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to read file: %w", err)
 		}
 
-		err = statsTracker.Submit("ab92b5e8-6b95-4157-ae8f-04ce65ce271a", imageBytes)
+		err = statsTracker.Submit("ab92b5e8-6b95-4157-ae8f-04ce65ce271a", imageBytes, timeutils.TodayDate())
 		if err != nil {
 			return fmt.Errorf("failed to submit image: %w", err)
 		}

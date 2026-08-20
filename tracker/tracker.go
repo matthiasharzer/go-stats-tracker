@@ -2,8 +2,10 @@ package tracker
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/matthiasharzer/go-stats-tracker/analyzer"
+	"github.com/matthiasharzer/go-stats-tracker/logging"
 	"github.com/matthiasharzer/go-stats-tracker/persistence"
 	"github.com/matthiasharzer/go-stats-tracker/tracker/spreadsheet"
 	"golang.org/x/oauth2"
@@ -23,12 +25,13 @@ func NewStatsTracker(analyzer analyzer.Analyzer, database persistence.Database, 
 	}
 }
 
-func (s *StatsTracker) Submit(userID string, imageData []byte) error {
-
+func (s *StatsTracker) Submit(userID string, imageData []byte, date time.Time) error {
 	stats, err := s.analyzer.ExtractPlayerStats(imageData)
 	if err != nil {
 		return fmt.Errorf("failed to extract player XP: %w", err)
 	}
+
+	logging.Info("extracted player stats", "userID", userID, "level", stats.Level, "gainedLevelXP", stats.GainedLevelXP, "totalLevelXP", stats.TotalLevelXP, "date", date.Format("2006-01-02"))
 
 	userContext, err := s.database.Lookup(userID)
 	if err != nil {
@@ -38,11 +41,9 @@ func (s *StatsTracker) Submit(userID string, imageData []byte) error {
 		return fmt.Errorf("user not found")
 	}
 
-	s.sheetService.AppendStats(*userContext, stats)
-
-	fmt.Printf("Level %d\n", stats.Level)
-	fmt.Printf("Total XP: %d\n", stats.TotalLevelXP)
-	fmt.Printf("Gained XP: %d\n", stats.GainedLevelXP)
-
+	err = s.sheetService.AppendStats(*userContext, stats, date)
+	if err != nil {
+		return fmt.Errorf("failed to append stats to spreadsheet: %w", err)
+	}
 	return nil
 }
