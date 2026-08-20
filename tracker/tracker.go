@@ -25,24 +25,16 @@ func NewStatsTracker(analyzer analyzer.Analyzer, database persistence.Database, 
 	}
 }
 
-func (s *StatsTracker) Submit(userID string, imageData []byte, date time.Time) error {
-	userContext, err := s.database.Lookup(userID)
-	if err != nil {
-		return fmt.Errorf("failed to lookup user: %w", err)
-	}
-	if userContext == nil {
-		return fmt.Errorf("user not found")
-	}
-
+func (s *StatsTracker) Submit(userContext persistence.UserContext, imageData []byte, date time.Time) error {
 	stats, err := s.analyzer.ExtractPlayerStats(imageData)
 	if err != nil {
 		logging.Error("failed to extract player stats", "err", err)
 		return fmt.Errorf("failed to extract player stats: %w", err)
 	}
 
-	logging.Info("extracted player stats", "userID", userID, "level", stats.Level, "gainedLevelXP", stats.GainedLevelXP, "totalLevelXP", stats.TotalLevelXP, "date", date.Format("2006-01-02"))
+	logging.Info("extracted player stats", "level", stats.Level, "gainedLevelXP", stats.GainedLevelXP, "totalLevelXP", stats.TotalLevelXP, "date", date.Format("2006-01-02"))
 
-	err = s.sheetService.AppendStats(*userContext, stats, date)
+	err = s.sheetService.AppendStats(userContext, stats, date)
 	if err != nil {
 		return fmt.Errorf("failed to append stats to spreadsheet: %w", err)
 	}

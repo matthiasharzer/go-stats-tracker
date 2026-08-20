@@ -16,9 +16,10 @@ COPY . .
 
 RUN module_path=$(go list -m) && \
     CGO_ENABLED=1 go build \
-		-o /go/bin/go-stats-tracker \
-		-ldflags "-X ${module_path}/cmd/version.version=$version" \
-		.
+										-trimpath \
+										-o /go/bin/go-stats-tracker \
+										-ldflags "-X ${module_path}/cmd/version.version=$version" \
+										.
 
 FROM alpine:3.24
 
