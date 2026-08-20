@@ -29,7 +29,7 @@ RUN apk add --no-cache \
     tesseract-ocr-data-eng \
     tesseract-ocr-data-deu
 
-RUN addgroup -S app && adduser -S -G app app
+RUN addgroup -g 1000 app && adduser -u 1000 -G app -D app
 
 COPY --from=build /go/bin/go-stats-tracker /usr/local/bin/go-stats-tracker
 
