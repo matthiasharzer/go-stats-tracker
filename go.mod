@@ -5,6 +5,7 @@ go 1.26.5
 tool honnef.co/go/tools/cmd/staticcheck
 
 require (
+	github.com/docker/go-units v0.5.0
 	github.com/google/uuid v1.6.0
 	github.com/otiai10/gosseract/v2 v2.4.1
 	github.com/spf13/cobra v1.10.2

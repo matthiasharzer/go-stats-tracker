@@ -2,7 +2,6 @@ package run
 
 import (
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/matthiasharzer/go-stats-tracker/logging"
 	"github.com/matthiasharzer/go-stats-tracker/persistence/sqlite"
 	"github.com/matthiasharzer/go-stats-tracker/tracker"
-	"github.com/matthiasharzer/go-stats-tracker/utils/timeutils"
 	"github.com/spf13/cobra"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -71,23 +69,7 @@ var Command = &cobra.Command{
 
 		statsTracker := tracker.NewStatsTracker(analyzer, database, *oauthConfig)
 
-		mux := getMux(*oauthConfig, database)
-
-		file, err := os.Open("test.png")
-		if err != nil {
-			return fmt.Errorf("failed to open file: %w", err)
-		}
-		defer file.Close()
-
-		imageBytes, err := io.ReadAll(file)
-		if err != nil {
-			return fmt.Errorf("failed to read file: %w", err)
-		}
-
-		err = statsTracker.Submit("ab92b5e8-6b95-4157-ae8f-04ce65ce271a", imageBytes, timeutils.TodayDate())
-		if err != nil {
-			return fmt.Errorf("failed to submit image: %w", err)
-		}
+		mux := getMux(*oauthConfig, database, statsTracker)
 
 		addr := fmt.Sprintf("%s:%d", httpHost, httpPort)
 		logging.Info("starting go-stats-tracker server", "host", httpHost, "port", httpPort)

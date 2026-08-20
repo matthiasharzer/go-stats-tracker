@@ -5,12 +5,14 @@ import (
 
 	"github.com/matthiasharzer/go-stats-tracker/api"
 	"github.com/matthiasharzer/go-stats-tracker/api/v1/callback"
+	"github.com/matthiasharzer/go-stats-tracker/api/v1/ingest"
 	"github.com/matthiasharzer/go-stats-tracker/api/v1/register"
 	"github.com/matthiasharzer/go-stats-tracker/persistence"
+	"github.com/matthiasharzer/go-stats-tracker/tracker"
 	"golang.org/x/oauth2"
 )
 
-func getMux(oath oauth2.Config, database persistence.Database) *http.ServeMux {
+func getMux(oath oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker) *http.ServeMux {
 	sharedState := api.NewSharedState()
 
 	mux := http.NewServeMux()
@@ -21,6 +23,7 @@ func getMux(oath oauth2.Config, database persistence.Database) *http.ServeMux {
 
 	mux.HandleFunc("GET /api/v1/register", register.Handler(sharedState, oath))
 	mux.HandleFunc("GET /api/v1/callback", callback.Handler(sharedState, oath, database))
+	mux.HandleFunc("POST /api/v1/ingest/{userID}", ingest.Handler(tracker))
 
 	return mux
 }

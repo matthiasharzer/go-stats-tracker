@@ -58,13 +58,13 @@ type row struct {
 	xp    cell[int64]
 }
 
-func findRow(rows []row, date time.Time) *row {
-	for _, row := range rows {
+func findRow(rows []row, date time.Time) (*row, int) {
+	for index, row := range rows {
 		if row.date.value.Equal(date) {
-			return &row
+			return &row, index
 		}
 	}
-	return nil
+	return nil, 0
 }
 
 func parseRow(rowValues []any, currentRowNumber int) (row, error) {
@@ -95,6 +95,11 @@ func parseRow(rowValues []any, currentRowNumber int) (row, error) {
 			value:  int64(xp),
 		},
 	}, nil
+}
+
+type updateContext struct {
+	dateCell           cell[time.Time]
+	defaultPlayerLevel int
 }
 
 type Service struct {
@@ -158,31 +163,44 @@ func (s *Service) setRow(srv *sheets.Service, spreadsheetID string, dateCell cel
 	return nil
 }
 
-func (s *Service) resolveDateCell(rows []row, date time.Time) (cell[time.Time], error) {
+func (s *Service) resolveUpdateContext(rows []row, date time.Time) (updateContext, error) {
 	if len(rows) == 0 {
-		return cell[time.Time]{
-			column: TargetRange.from.column,
-			row:    TargetRange.from.row,
-			value:  date,
+		return updateContext{
+			dateCell: cell[time.Time]{
+				column: TargetRange.from.column,
+				row:    TargetRange.from.row,
+				value:  date,
+			},
+			defaultPlayerLevel: 1,
 		}, nil
 	}
 	latestRow := rows[len(rows)-1]
-	existingRow := findRow(rows, date)
+	existingRow, index := findRow(rows, date)
 
 	if existingRow != nil {
+		defaultPlayerLevel := 1
+		if index > 0 {
+			defaultPlayerLevel = rows[index-1].level.value
+		}
 		logging.Info("found existing row", "date", date.Format("2006-01-02"), "row", existingRow.date.row)
-		return existingRow.date, nil
+		return updateContext{
+			dateCell:           existingRow.date,
+			defaultPlayerLevel: defaultPlayerLevel,
+		}, nil
 	}
 
 	if date.Before(latestRow.date.value) {
-		return cell[time.Time]{}, fmt.Errorf("cannot insert out of order date")
+		return updateContext{}, fmt.Errorf("cannot insert out of order date")
 	}
 
 	logging.Info("no existing row found, creating new one", "date", date.Format("2006-01-02"))
-	return cell[time.Time]{
-		column: latestRow.date.column,
-		row:    latestRow.date.row + 1,
-		value:  date,
+	return updateContext{
+		dateCell: cell[time.Time]{
+			column: latestRow.date.column,
+			row:    latestRow.date.row + 1,
+			value:  date,
+		},
+		defaultPlayerLevel: latestRow.level.value,
 	}, nil
 }
 
@@ -209,13 +227,19 @@ func (s *Service) AppendStats(userContext persistence.UserContext, stats analyze
 		return fmt.Errorf("empty rows no supported yet")
 	}
 
-	targetDateCell, err := s.resolveDateCell(rows, date)
+	updateContext, err := s.resolveUpdateContext(rows, date)
 	if err != nil {
 		return fmt.Errorf("failed to resolve date cell: %w", err)
 	}
 
-	logging.Info("writing row", "spreadsheetID", userContext.TargetSpreadsheetID, "date", targetDateCell.value.Format("2006-01-02"), "dateCell", targetDateCell.format(), "level", stats.Level, "xp", stats.GainedLevelXP)
-	err = s.setRow(srv, userContext.TargetSpreadsheetID, targetDateCell, stats.Level, stats.GainedLevelXP)
+	dateCell := updateContext.dateCell
+	playerLevel := updateContext.defaultPlayerLevel
+	if stats.Level != 0 {
+		playerLevel = stats.Level
+	}
+
+	logging.Info("writing row", "spreadsheetID", userContext.TargetSpreadsheetID, "date", dateCell.value.Format("2006-01-02"), "dateCell", dateCell.format(), "level", stats.Level, "xp", stats.GainedLevelXP)
+	err = s.setRow(srv, userContext.TargetSpreadsheetID, dateCell, playerLevel, stats.GainedLevelXP)
 	if err != nil {
 		return fmt.Errorf("failed to set row: %w", err)
 	}

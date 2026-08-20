@@ -13,9 +13,9 @@ import (
 	"github.com/matthiasharzer/go-stats-tracker/logging"
 )
 
-// Matches `<level> ??? LEVEL` where ??? may be a line break, since the level number is usually not on the same line
-// as the LEVEL text
-var levelRegex = regexp.MustCompile(`(?P<level>\d+)(?s).+LEVEL`)
+// Matches `<level> ??? LEVEL` where ??? may be anything and contain up to 2 line breaks, since the level number is
+// usually not on the same line as the LEVEL text
+var levelRegex = regexp.MustCompile(`(?P<level>\d+)(.*\s?){0,2}LEVEL`)
 
 // Matches `xxx.xxx.xxx / yyy.yyy.yyy`, where the left side of / is the current gained xp for the level and the right
 // side is the total XP required to level up. Includes tolerance for optional whitespace around the /
@@ -97,7 +97,7 @@ func (a *Analyzer) ExtractPlayerStats(imageData []byte) (analyzer.PlayerStats, e
 
 	level, err := extractPlayerLevel(text)
 	if err != nil {
-		return analyzer.PlayerStats{}, fmt.Errorf("failed to extract player level: %w", err)
+		logging.Warn("failed to extract player level")
 	}
 
 	gained, total, err := extractPlayerXP(text)

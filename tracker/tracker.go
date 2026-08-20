@@ -26,13 +26,6 @@ func NewStatsTracker(analyzer analyzer.Analyzer, database persistence.Database, 
 }
 
 func (s *StatsTracker) Submit(userID string, imageData []byte, date time.Time) error {
-	stats, err := s.analyzer.ExtractPlayerStats(imageData)
-	if err != nil {
-		return fmt.Errorf("failed to extract player XP: %w", err)
-	}
-
-	logging.Info("extracted player stats", "userID", userID, "level", stats.Level, "gainedLevelXP", stats.GainedLevelXP, "totalLevelXP", stats.TotalLevelXP, "date", date.Format("2006-01-02"))
-
 	userContext, err := s.database.Lookup(userID)
 	if err != nil {
 		return fmt.Errorf("failed to lookup user: %w", err)
@@ -40,6 +33,13 @@ func (s *StatsTracker) Submit(userID string, imageData []byte, date time.Time) e
 	if userContext == nil {
 		return fmt.Errorf("user not found")
 	}
+
+	stats, err := s.analyzer.ExtractPlayerStats(imageData)
+	if err != nil {
+		return fmt.Errorf("failed to extract player XP: %w", err)
+	}
+
+	logging.Info("extracted player stats", "userID", userID, "level", stats.Level, "gainedLevelXP", stats.GainedLevelXP, "totalLevelXP", stats.TotalLevelXP, "date", date.Format("2006-01-02"))
 
 	err = s.sheetService.AppendStats(*userContext, stats, date)
 	if err != nil {
