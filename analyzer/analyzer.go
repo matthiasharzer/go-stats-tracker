@@ -7,5 +7,6 @@ type PlayerStats struct {
 }
 
 type Analyzer interface {
-	ExtractPlayerStats(imageData []byte) (PlayerStats, error)
+	ExtractPlayerStats() (PlayerStats, error)
+	IsPlayerPage() (bool, error)
 }

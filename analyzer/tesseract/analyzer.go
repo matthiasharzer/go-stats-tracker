@@ -21,8 +21,61 @@ var levelRegex = regexp.MustCompile(`(?P<level>\d+)(.*\s?){0,2}LEVEL`)
 // side is the total XP required to level up. Includes tolerance for optional whitespace around the /
 var xpRegex = regexp.MustCompile(`(?P<gained>(\d+\.?)+)\s*/\s*(?P<total>(\d+\.?)+)`)
 
-func extractPlayerLevel(text string) (int, error) {
-	matches := levelRegex.FindStringSubmatch(text)
+var userPageRegexes []*regexp.Regexp
+
+func init() {
+	for _, loc := range localizations {
+		regexStr := fmt.Sprintf("(?i)%s\\s+%s\\s+%s", loc.You, loc.Friends, loc.Groups)
+		userPageRegexes = append(userPageRegexes, regexp.MustCompile(regexStr))
+	}
+}
+
+func parseLevel(levelStr string) (int64, error) {
+	levelNormalized := strings.ReplaceAll(levelStr, ".", "")
+	level, err := strconv.ParseInt(levelNormalized, 10, 64)
+	if err != nil {
+		return 0, errors.New("failed to convert player level to int")
+	}
+	return level, nil
+}
+
+type Analyzer struct {
+	imageData []byte
+	text      string
+}
+
+func newClient() (*gosseract.Client, func()) {
+	client := gosseract.NewClient()
+	return client, func() {
+		err := client.Close()
+		if err != nil {
+			logging.Warn("Failed to close tesseract client", "err", err)
+		}
+	}
+}
+
+func NewAnalyzer(imageData []byte) (analyzer.Analyzer, error) {
+	client, closeClient := newClient()
+	defer closeClient()
+
+	err := client.SetImageFromBytes(imageData)
+	if err != nil {
+		return nil, fmt.Errorf("failed to set image from bytes: %w", err)
+	}
+
+	text, err := client.Text()
+	if err != nil {
+		return nil, fmt.Errorf("failed to extract text: %w", err)
+	}
+
+	return &Analyzer{
+		imageData: imageData,
+		text:      text,
+	}, nil
+}
+
+func (a *Analyzer) extractPlayerLevel() (int, error) {
+	matches := levelRegex.FindStringSubmatch(a.text)
 	if len(matches) < 2 {
 		return 0, errors.New("could not extract player level")
 	}
@@ -35,17 +88,8 @@ func extractPlayerLevel(text string) (int, error) {
 	return level, nil
 }
 
-func parseLevel(levelStr string) (int64, error) {
-	levelNormalized := strings.ReplaceAll(levelStr, ".", "")
-	level, err := strconv.ParseInt(levelNormalized, 10, 64)
-	if err != nil {
-		return 0, errors.New("failed to convert player level to int")
-	}
-	return level, nil
-}
-
-func extractPlayerXP(text string) (gained int64, total int64, err error) {
-	matches := xpRegex.FindStringSubmatch(text)
+func (a *Analyzer) extractPlayerXP() (gained int64, total int64, err error) {
+	matches := xpRegex.FindStringSubmatch(a.text)
 
 	if len(matches) < 3 {
 		return 0, 0, errors.New("could not extract player xp")
@@ -64,43 +108,13 @@ func extractPlayerXP(text string) (gained int64, total int64, err error) {
 	return gained, total, nil
 }
 
-type Analyzer struct {
-}
-
-func newClient() (*gosseract.Client, func()) {
-	client := gosseract.NewClient()
-	return client, func() {
-		err := client.Close()
-		if err != nil {
-			logging.Warn("Failed to close tesseract client", "err", err)
-		}
-	}
-}
-
-func NewAnalyzer() (analyzer.Analyzer, error) {
-	return &Analyzer{}, nil
-}
-
-func (a *Analyzer) ExtractPlayerStats(imageData []byte) (analyzer.PlayerStats, error) {
-	client, closeClient := newClient()
-	defer closeClient()
-
-	err := client.SetImageFromBytes(imageData)
-	if err != nil {
-		return analyzer.PlayerStats{}, fmt.Errorf("failed to set image from bytes: %w", err)
-	}
-
-	text, err := client.Text()
-	if err != nil {
-		return analyzer.PlayerStats{}, fmt.Errorf("failed to extract text: %w", err)
-	}
-
-	level, err := extractPlayerLevel(text)
+func (a *Analyzer) ExtractPlayerStats() (analyzer.PlayerStats, error) {
+	level, err := a.extractPlayerLevel()
 	if err != nil {
 		logging.Warn("failed to extract player level")
 	}
 
-	gained, total, err := extractPlayerXP(text)
+	gained, total, err := a.extractPlayerXP()
 	if err != nil {
 		return analyzer.PlayerStats{}, fmt.Errorf("failed to extract player xp: %w", err)
 	}
@@ -110,4 +124,13 @@ func (a *Analyzer) ExtractPlayerStats(imageData []byte) (analyzer.PlayerStats, e
 		TotalLevelXP:  total,
 		GainedLevelXP: gained,
 	}, nil
+}
+
+func (a *Analyzer) IsPlayerPage() (bool, error) {
+	for _, regex := range userPageRegexes {
+		if regex.MatchString(a.text) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
