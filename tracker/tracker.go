@@ -11,22 +11,40 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type CreateAnalyzerFunc = func(imageData []byte) (analyzer.Analyzer, error)
+
 type StatsTracker struct {
-	analyzer     analyzer.Analyzer
-	database     persistence.Database
-	sheetService *spreadsheet.Service
+	createAnalyzer CreateAnalyzerFunc
+	database       persistence.Database
+	sheetService   *spreadsheet.Service
 }
 
-func NewStatsTracker(analyzer analyzer.Analyzer, database persistence.Database, oauth oauth2.Config) *StatsTracker {
+func NewStatsTracker(createAnalyzer CreateAnalyzerFunc, database persistence.Database, oauth oauth2.Config) *StatsTracker {
 	return &StatsTracker{
-		analyzer:     analyzer,
-		database:     database,
-		sheetService: spreadsheet.NewService(oauth),
+		createAnalyzer: createAnalyzer,
+		database:       database,
+		sheetService:   spreadsheet.NewService(oauth),
 	}
 }
 
 func (s *StatsTracker) Submit(userContext persistence.UserContext, imageData []byte, date time.Time) error {
-	stats, err := s.analyzer.ExtractPlayerStats(imageData)
+	statAnalyzer, err := s.createAnalyzer(imageData)
+	if err != nil {
+		logging.Error("failed to create analyzer", "err", err)
+		return fmt.Errorf("unable to create analyzer: %w", err)
+	}
+
+	isPlayerPage, err := statAnalyzer.IsPlayerPage()
+	if err != nil {
+		logging.Error("failed to check if image is a player page", "err", err)
+		return fmt.Errorf("unable to check if image is a player page: %w", err)
+	}
+	if !isPlayerPage {
+		logging.Info("image is not a player page")
+		return fmt.Errorf("unable to check if image is a player page")
+	}
+
+	stats, err := statAnalyzer.ExtractPlayerStats()
 	if err != nil {
 		logging.Error("failed to extract player stats", "err", err)
 		return fmt.Errorf("failed to extract player stats: %w", err)

@@ -53,11 +53,6 @@ var Command = &cobra.Command{
 	Use:   "run",
 	Short: "run the stats tracker server",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		analyzer, err := tesseract.NewAnalyzer()
-		if err != nil {
-			return fmt.Errorf("failed to create analyzer: %w", err)
-		}
-
 		oauthConfig, err := getGoogleOauthConfig()
 		if err != nil {
 			return fmt.Errorf("failed to get oauth config: %w", err)
@@ -68,7 +63,7 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to create database: %w", err)
 		}
 
-		statsTracker := tracker.NewStatsTracker(analyzer, database, *oauthConfig)
+		statsTracker := tracker.NewStatsTracker(tesseract.NewAnalyzer, database, *oauthConfig)
 
 		mux := getMux(*oauthConfig, database, statsTracker)
 
