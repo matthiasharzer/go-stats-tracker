@@ -36,12 +36,10 @@ func (s *StatsTracker) Submit(userContext persistence.UserContext, imageData []b
 
 	isPlayerPage, err := statAnalyzer.IsPlayerPage()
 	if err != nil {
-		logging.Error("failed to check if image is a player page", "err", err)
 		return fmt.Errorf("unable to check if image is a player page: %w", err)
 	}
 	if !isPlayerPage {
-		logging.Info("image is not a player page")
-		return fmt.Errorf("unable to check if image is a player page")
+		return fmt.Errorf("image is not a player page")
 	}
 
 	stats, err := statAnalyzer.ExtractPlayerStats()
