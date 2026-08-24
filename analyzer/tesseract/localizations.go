@@ -1,20 +1,20 @@
 package tesseract
 
 type localization struct {
-	You     string
+	Me      string
 	Friends string
-	Groups  string
+	Social  string
 }
 
 var localizations = []localization{
 	{
-		You:     "You",
+		Me:      "Me",
 		Friends: "Friends",
-		Groups:  "Groups",
+		Social:  "Social",
 	},
 	{
-		You:     "Du",
+		Me:      "Du",
 		Friends: "Freunde",
-		Groups:  "Gruppen",
+		Social:  "Gruppen",
 	},
 }

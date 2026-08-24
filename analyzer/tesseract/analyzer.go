@@ -25,7 +25,7 @@ var userPageRegexes []*regexp.Regexp
 
 func init() {
 	for _, loc := range localizations {
-		regexStr := fmt.Sprintf("(?i)%s\\s+%s\\s+%s", loc.You, loc.Friends, loc.Groups)
+		regexStr := fmt.Sprintf("(?i)%s\\s+%s\\s+%s", loc.Me, loc.Friends, loc.Social)
 		userPageRegexes = append(userPageRegexes, regexp.MustCompile(regexStr))
 	}
 }
