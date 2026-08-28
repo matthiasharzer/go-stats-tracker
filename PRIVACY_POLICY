@@ -1,0 +1,23 @@
+Privacy Policy for Pokémon Go Stats Tracker
+Last Updated: August 28, 2026
+
+This Privacy Policy explains how Pokémon Go Stats Tracker ("we", "us", or "our") collects, uses, and protects your information when you use our application.
+
+1. Google User Data We Access
+To provide our core functionality, Pokémon Go Stats Tracker requests full access to your Google Sheets (view, edit, create, and delete permissions). This access is strictly used to interact with your spreadsheets directly as requested by you within the application interface.
+
+2. How We Use and Store Your Data
+We do not store your Google Sheets data. All data retrieved from your Google Sheets is processed entirely on-the-fly or locally on your client device. We do not maintain databases of your spreadsheet content, nor do we cache or save your personal spreadsheet data on any external servers.
+
+3. Data Sharing and Disclosure
+We respect your privacy. We do not share, sell, or transfer your Google Sheets data to any external parties, third-party services, or advertising networks. Your data is strictly kept within the active session of the app to perform the tasks you initiate.
+
+4. Google API Services User Data Policy (Limited Use)
+Pokémon Go Stats Tracker's use and transfer to any other app of information received from Google APIs will adhere to the Google API Services User Data Policy, including the Limited Use requirements.
+
+5. Revoking Access
+You can revoke Pokémon Go Stats Tracker's access to your Google account at any time by visiting your Google Account's Security settings page and removing access for this application.
+
+6. Contact Us
+If you have any questions or concerns about this Privacy Policy or how your data is handled, please contact Matthias Harzer at:
+Email: matthias.harzer03@gmail.com
