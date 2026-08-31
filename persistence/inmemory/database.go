@@ -8,37 +8,37 @@ import (
 
 type Database struct {
 	mu *sync.RWMutex
-	m  map[string]persistence.UserContext
+	m  map[string]persistence.SheetContext
 }
 
 func NewDatabase() persistence.Database {
 	return &Database{
 		mu: &sync.RWMutex{},
-		m:  make(map[string]persistence.UserContext),
+		m:  make(map[string]persistence.SheetContext),
 	}
 }
 
-func (d *Database) Lookup(userID string) (*persistence.UserContext, error) {
+func (d *Database) Lookup(accessKey string) (*persistence.SheetContext, error) {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
-	userContext, ok := d.m[userID]
+	sheetContext, ok := d.m[accessKey]
 	if !ok {
 		return nil, nil
 	}
-	return &userContext, nil
+	return &sheetContext, nil
 }
 
-func (d *Database) Save(userID string, value persistence.UserContext) error {
+func (d *Database) Save(accessKey string, value persistence.SheetContext) error {
 	d.mu.Lock()
 	defer d.mu.Unlock()
-	d.m[userID] = value
+	d.m[accessKey] = value
 	return nil
 }
 
-func (d *Database) Exists(userID string) (bool, error) {
-	userContext, err := d.Lookup(userID)
+func (d *Database) Exists(accessKey string) (bool, error) {
+	sheetContext, err := d.Lookup(accessKey)
 	if err != nil {
 		return false, err
 	}
-	return userContext != nil, nil
+	return sheetContext != nil, nil
 }

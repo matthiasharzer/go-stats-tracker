@@ -208,7 +208,7 @@ func (s *Service) resolveUpdateContext(rows []row, date time.Time) (updateContex
 	}, nil
 }
 
-func (s *Service) AppendStats(userContext persistence.UserContext, stats analyzer.PlayerStats, date time.Time) error {
+func (s *Service) AppendStats(userContext persistence.SheetContext, stats analyzer.PlayerStats, date time.Time) error {
 	ctx := context.Background()
 
 	token := &oauth2.Token{

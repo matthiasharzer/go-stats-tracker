@@ -5,37 +5,62 @@ import (
 	"sync"
 )
 
+type AuthFlowState struct {
+	UserAccessKey string
+	RefreshToken  string
+}
+
 type SharedState struct {
 	mu     *sync.RWMutex
-	states map[string]string
+	states map[string]AuthFlowState
 }
 
 func NewSharedState() *SharedState {
 	return &SharedState{
 		mu:     &sync.RWMutex{},
-		states: make(map[string]string),
+		states: make(map[string]AuthFlowState),
 	}
 }
 
-func (s *SharedState) NewStateID(sheetID string) string {
+func (s *SharedState) NewStateID(accessKey string) string {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	stateID := rand.Text()
-	s.states[stateID] = sheetID
+	s.states[stateID] = AuthFlowState{
+		UserAccessKey: accessKey,
+	}
 
 	return stateID
 }
 
-func (s *SharedState) PopStateID(stateID string) string {
+func (s *SharedState) UpdateState(stateID string, state AuthFlowState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	sheetID, ok := s.states[stateID]
+	s.states[stateID] = state
+}
+
+func (s *SharedState) PeekState(stateID string) *AuthFlowState {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	accessKey, ok := s.states[stateID]
 	if !ok {
-		return ""
+		return nil
+	}
+	return &accessKey
+}
+
+func (s *SharedState) PopState(stateID string) *AuthFlowState {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	accessKey, ok := s.states[stateID]
+	if !ok {
+		return nil
 	}
 
 	delete(s.states, stateID)
-	return sheetID
+	return &accessKey
 }

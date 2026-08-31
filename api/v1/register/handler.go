@@ -5,21 +5,18 @@ import (
 
 	"github.com/matthiasharzer/go-stats-tracker/api"
 	"github.com/matthiasharzer/go-stats-tracker/logging"
+	stringutil "github.com/matthiasharzer/go-stats-tracker/utils/stringutils"
 	"golang.org/x/oauth2"
 )
 
 func Handler(sharedState *api.SharedState, oauth oauth2.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		sheetID := r.URL.Query().Get("sheet_id")
-		if sheetID == "" {
-			http.Error(w, "Missing sheet_id", http.StatusBadRequest)
-			return
-		}
+		accessKey := stringutil.RandomString(48)
 
-		stateID := sharedState.NewStateID(sheetID)
+		stateID := sharedState.NewStateID(accessKey)
 		authURL := oauth.AuthCodeURL(stateID, oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 
-		logging.Info("requesting access", "sheet_id", sheetID)
+		logging.Info("requesting access", "state_id", stateID)
 
 		http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
 	}

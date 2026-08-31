@@ -27,7 +27,7 @@ func NewStatsTracker(createAnalyzer CreateAnalyzerFunc, database persistence.Dat
 	}
 }
 
-func (s *StatsTracker) Submit(userContext persistence.UserContext, imageData []byte, date time.Time) error {
+func (s *StatsTracker) Submit(userContext persistence.SheetContext, imageData []byte, date time.Time) error {
 	statAnalyzer, err := s.createAnalyzer(imageData)
 	if err != nil {
 		logging.Error("failed to create analyzer", "err", err)

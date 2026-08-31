@@ -34,10 +34,10 @@ func (d *Database) createTable() error {
 	if err != nil {
 		return err
 	}
-	defer funcutils.IgnoreError(db.Close)
+	defer funcutils.LogError(db.Close, "failed to close database connection")
 
-	createTableSQL := `CREATE TABLE IF NOT EXISTS user_context (
-		userID TEXT PRIMARY KEY,
+	createTableSQL := `CREATE TABLE IF NOT EXISTS sheet_context (
+		accessKey TEXT PRIMARY KEY,
 		googleRefreshToken TEXT NOT NULL,
 		targetSpreadsheetID TEXT NOT NULL
 	);`
@@ -49,15 +49,15 @@ func (d *Database) createTable() error {
 	return nil
 }
 
-func (d *Database) Lookup(userID string) (*persistence.UserContext, error) {
+func (d *Database) Lookup(accessKey string) (*persistence.SheetContext, error) {
 	db, err := d.connect()
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer funcutils.IgnoreError(db.Close)
+	defer funcutils.LogError(db.Close, "failed to close database connection")
 
-	selectSQL := `SELECT googleRefreshToken, targetSpreadsheetID FROM user_context WHERE userID = ?`
-	row := db.QueryRow(selectSQL, userID)
+	selectSQL := `SELECT googleRefreshToken, targetSpreadsheetID FROM sheet_context WHERE accessKey = ?`
+	row := db.QueryRow(selectSQL, accessKey)
 
 	var googleRefreshToken, targetSpreadsheetID string
 	err = row.Scan(&googleRefreshToken, &targetSpreadsheetID)
@@ -68,36 +68,36 @@ func (d *Database) Lookup(userID string) (*persistence.UserContext, error) {
 		return nil, fmt.Errorf("failed to scan row: %w", err)
 	}
 
-	return &persistence.UserContext{
+	return &persistence.SheetContext{
 		GoogleRefreshToken:  googleRefreshToken,
 		TargetSpreadsheetID: targetSpreadsheetID,
 	}, nil
 }
-func (d *Database) Save(userID string, userContext persistence.UserContext) error {
+func (d *Database) Save(accessKey string, sheetContext persistence.SheetContext) error {
 	db, err := d.connect()
 	if err != nil {
 		return fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer funcutils.IgnoreError(db.Close)
+	defer funcutils.LogError(db.Close, "failed to close database connection")
 
-	insertSQL := `INSERT INTO user_context (userID, googleRefreshToken, targetSpreadsheetID) VALUES (?, ?, ?)`
-	_, err = db.Exec(insertSQL, userID, userContext.GoogleRefreshToken, userContext.TargetSpreadsheetID)
+	insertSQL := `INSERT INTO sheet_context (accessKey, googleRefreshToken, targetSpreadsheetID) VALUES (?, ?, ?)`
+	_, err = db.Exec(insertSQL, accessKey, sheetContext.GoogleRefreshToken, sheetContext.TargetSpreadsheetID)
 	if err != nil {
-		return fmt.Errorf("failed to insert into user_context: %w", err)
+		return fmt.Errorf("failed to insert into sheet_context: %w", err)
 	}
 
 	return nil
 }
 
-func (d *Database) Exists(userID string) (bool, error) {
+func (d *Database) Exists(accessKey string) (bool, error) {
 	db, err := d.connect()
 	if err != nil {
 		return false, fmt.Errorf("failed to connect to database: %w", err)
 	}
-	defer funcutils.IgnoreError(db.Close)
+	defer funcutils.LogError(db.Close, "failed to close database connection")
 
-	selectSQL := `SELECT COUNT(*) FROM user_context WHERE userID = ?`
-	row := db.QueryRow(selectSQL, userID)
+	selectSQL := `SELECT COUNT(*) FROM sheet_context WHERE accessKey = ?`
+	row := db.QueryRow(selectSQL, accessKey)
 
 	var count int
 	err = row.Scan(&count)
