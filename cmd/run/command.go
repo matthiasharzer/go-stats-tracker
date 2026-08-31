@@ -34,7 +34,7 @@ func getGoogleOauthConfig() (*oauth2.Config, error) {
 		RedirectURL:  redirectURL,
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		Scopes:       []string{"https://www.googleapis.com/auth/spreadsheets"},
+		Scopes:       []string{"https://www.googleapis.com/auth/drive.file"},
 		Endpoint:     google.Endpoint,
 	}, nil
 }

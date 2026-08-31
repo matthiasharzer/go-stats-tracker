@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Select Spreadsheet</title>
+	<!-- Load the Google API loader -->
+	<script src="https://apis.google.com/js/api.js"></script>
+	<script>
+		// These values are injected by your Go server's template engine
+		const developerKey = '{{.DeveloperKey}}';
+		const accessToken = '{{.AccessToken}}';
+		const userID = '{{.UserID}}';
+
+		function loadPicker() {
+			gapi.load('picker', { 'callback': onPickerApiLoad });
+		}
+
+		function onPickerApiLoad() {
+			const view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
+				.setMimeTypes('application/vnd.google-apps.spreadsheet');
+
+			const picker = new google.picker.PickerBuilder()
+				.addView(view)
+				.setOAuthToken(accessToken)
+				.setDeveloperKey(developerKey)
+				.setCallback(pickerCallback)
+				.build();
+
+			picker.setVisible(true);
+		}
+
+		function pickerCallback(data) {
+			if (data.action == google.picker.Action.PICKED) {
+				const documentId = data.docs[0].id;
+
+				// Send the selected ID back to your Go server
+				fetch('/link-sheet', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						user_id: userID,
+						sheet_id: documentId
+					})
+				})
+					.then(response => {
+						if (response.ok) {
+							document.getElementById('status').innerText =
+								"Success! Set your mobile app to use User ID: " + userID;
+						}
+					});
+			}
+		}
+	</script>
+</head>
+<body onload="loadPicker()">
+<h2>Please select the Google Sheet to use</h2>
+<div id="status">Waiting for selection...</div>
+</body>
+</html>
