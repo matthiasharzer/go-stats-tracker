@@ -1,4 +1,4 @@
-package stringutil
+package stringutils
 
 import (
 	"crypto/rand"

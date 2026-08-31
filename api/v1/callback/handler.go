@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"html/template"
 	"net/http"
-	"os"
 
 	"github.com/matthiasharzer/go-stats-tracker/api"
 	"golang.org/x/oauth2"
@@ -14,33 +13,13 @@ import (
 var templateHTML string
 
 type TemplateData struct {
-	DeveloperKey  string
+	APIKey        string
 	AccessToken   string
 	UserAccessKey string
 	State         string
 }
 
-func getTemplateData() TemplateData {
-	developerKey := os.Getenv("DEVELOPER_KEY")
-	accessToken := os.Getenv("ACCESS_TOKEN")
-	userID := os.Getenv("USER_ID")
-
-	if developerKey == "" || accessToken == "" || userID == "" {
-		panic("Environment variables DEVELOPER_KEY, ACCESS_TOKEN, and USER_ID must be set")
-	}
-
-	return TemplateData{
-		DeveloperKey:  developerKey,
-		AccessToken:   accessToken,
-		UserAccessKey: userID,
-	}
-}
-
-func Handler(sharedState *api.SharedState, oauth oauth2.Config) http.HandlerFunc {
-	developerKEy := os.Getenv("DEVELOPER_KEY")
-	if developerKEy == "" {
-		panic("Environment variable DEVELOPER_KEY must be set")
-	}
+func Handler(sharedState *api.SharedState, oauth oauth2.Config, filePickerAPIKey string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		state := r.FormValue("state")
 		if state == "" {
@@ -72,7 +51,7 @@ func Handler(sharedState *api.SharedState, oauth oauth2.Config) http.HandlerFunc
 		})
 
 		templateData := TemplateData{
-			DeveloperKey:  developerKEy,
+			APIKey:        filePickerAPIKey,
 			AccessToken:   token.AccessToken,
 			UserAccessKey: authFlowState.UserAccessKey,
 			State:         state,

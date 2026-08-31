@@ -5,13 +5,13 @@ import (
 
 	"github.com/matthiasharzer/go-stats-tracker/api"
 	"github.com/matthiasharzer/go-stats-tracker/logging"
-	stringutil "github.com/matthiasharzer/go-stats-tracker/utils/stringutils"
+	"github.com/matthiasharzer/go-stats-tracker/utils/stringutils"
 	"golang.org/x/oauth2"
 )
 
 func Handler(sharedState *api.SharedState, oauth oauth2.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		accessKey := stringutil.RandomString(48)
+		accessKey := stringutils.RandomString(48)
 
 		stateID := sharedState.NewStateID(accessKey)
 		authURL := oauth.AuthCodeURL(stateID, oauth2.AccessTypeOffline, oauth2.ApprovalForce)
