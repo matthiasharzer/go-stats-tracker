@@ -27,7 +27,7 @@ func NewStatsTracker(createAnalyzer CreateAnalyzerFunc, database persistence.Dat
 	}
 }
 
-func (s *StatsTracker) Submit(userContext persistence.UserContext, imageData []byte, date time.Time) error {
+func (s *StatsTracker) Submit(sheetContext persistence.SheetContext, imageData []byte, date time.Time) error {
 	statAnalyzer, err := s.createAnalyzer(imageData)
 	if err != nil {
 		logging.Error("failed to create analyzer", "err", err)
@@ -50,7 +50,7 @@ func (s *StatsTracker) Submit(userContext persistence.UserContext, imageData []b
 
 	logging.Info("extracted player stats", "level", stats.Level, "gainedLevelXP", stats.GainedLevelXP, "totalLevelXP", stats.TotalLevelXP, "date", date.Format("2006-01-02"))
 
-	err = s.sheetService.AppendStats(userContext, stats, date)
+	err = s.sheetService.AppendStats(sheetContext, stats, date)
 	if err != nil {
 		return fmt.Errorf("failed to append stats to spreadsheet: %w", err)
 	}

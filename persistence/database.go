@@ -1,12 +1,11 @@
 package persistence
 
-type UserContext struct {
+type SheetContext struct {
 	GoogleRefreshToken  string
 	TargetSpreadsheetID string
 }
 
 type Database interface {
-	Lookup(userID string) (*UserContext, error)
-	Save(userID string, userContext UserContext) error
-	Exists(userID string) (bool, error)
+	Lookup(accessKey string) (*SheetContext, error)
+	Save(accessKey string, sheetContext SheetContext) error
 }

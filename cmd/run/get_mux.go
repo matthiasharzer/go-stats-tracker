@@ -1,19 +1,21 @@
 package run
 
 import (
+	"context"
 	"net/http"
 
-	"github.com/matthiasharzer/go-stats-tracker/api"
-	"github.com/matthiasharzer/go-stats-tracker/api/v1/callback"
-	"github.com/matthiasharzer/go-stats-tracker/api/v1/ingest"
-	"github.com/matthiasharzer/go-stats-tracker/api/v1/register"
+	"github.com/matthiasharzer/go-stats-tracker/api/v1/auth"
+	"github.com/matthiasharzer/go-stats-tracker/api/v1/auth/callback"
+	"github.com/matthiasharzer/go-stats-tracker/api/v1/auth/link"
+	"github.com/matthiasharzer/go-stats-tracker/api/v1/auth/register"
+	"github.com/matthiasharzer/go-stats-tracker/api/v1/submit"
 	"github.com/matthiasharzer/go-stats-tracker/persistence"
 	"github.com/matthiasharzer/go-stats-tracker/tracker"
 	"golang.org/x/oauth2"
 )
 
-func getMux(oauth oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker) *http.ServeMux {
-	sharedState := api.NewSharedState()
+func getMux(ctx context.Context, oauth oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker, pickerAPIKey string, appID string) *http.ServeMux {
+	sharedState := auth.NewSharedState(ctx)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/health", func(w http.ResponseWriter, r *http.Request) {
@@ -21,9 +23,10 @@ func getMux(oauth oauth2.Config, database persistence.Database, tracker *tracker
 		_, _ = w.Write([]byte("OK"))
 	})
 
-	mux.HandleFunc("GET /api/v1/register", register.Handler(sharedState, oauth))
-	mux.HandleFunc("GET /api/v1/callback", callback.Handler(sharedState, oauth, database))
-	mux.HandleFunc("POST /api/v1/ingest/{userID}", ingest.Handler(database, tracker))
+	mux.HandleFunc("GET /api/v1/auth/register", register.Handler(sharedState, oauth))
+	mux.HandleFunc("GET /api/v1/auth/callback", callback.Handler(sharedState, oauth, pickerAPIKey, appID))
+	mux.HandleFunc("POST /api/v1/auth/link", link.Handler(sharedState, database))
+	mux.HandleFunc("POST /api/v1/submit/{sheetID}", submit.Handler(database, tracker))
 
 	return mux
 }

@@ -10,5 +10,7 @@ services:
       REDIRECT_URL: ${REDIRECT_URL}
       CLIENT_ID: ${CLIENT_ID}
       CLIENT_SECRET: ${CLIENT_SECRET}
+      APP_ID: ${APP_ID}
+      PICKER_API_KEY: ${PICKER_API_KEY}
     volumes:
       - ./data:/app/data

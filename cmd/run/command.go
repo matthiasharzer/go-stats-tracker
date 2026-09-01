@@ -1,6 +1,7 @@
 package run
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -34,9 +35,22 @@ func getGoogleOauthConfig() (*oauth2.Config, error) {
 		RedirectURL:  redirectURL,
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
-		Scopes:       []string{"https://www.googleapis.com/auth/spreadsheets"},
+		Scopes:       []string{"https://www.googleapis.com/auth/drive.file"},
 		Endpoint:     google.Endpoint,
 	}, nil
+}
+
+func getFilePickerCredentials() (pickerAPIKey string, appId string, err error) {
+	pickerAPIKey = os.Getenv("PICKER_API_KEY")
+	if pickerAPIKey == "" {
+		return "", "", fmt.Errorf("PICKER_API_KEY is not set")
+	}
+	appId = os.Getenv("APP_ID")
+	if appId == "" {
+		return "", "", fmt.Errorf("APP_ID is not set")
+	}
+
+	return pickerAPIKey, appId, nil
 }
 
 var httpPort int
@@ -58,6 +72,11 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to get oauth config: %w", err)
 		}
 
+		pickerAPIKey, appID, err := getFilePickerCredentials()
+		if err != nil {
+			return fmt.Errorf("failed to get file picker credentials: %w", err)
+		}
+
 		database, err := sqlite.NewDatabase(dbFile)
 		if err != nil {
 			return fmt.Errorf("failed to create database: %w", err)
@@ -65,7 +84,9 @@ var Command = &cobra.Command{
 
 		statsTracker := tracker.NewStatsTracker(tesseract.NewAnalyzer, database, *oauthConfig)
 
-		mux := getMux(*oauthConfig, database, statsTracker)
+		appContext, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		mux := getMux(appContext, *oauthConfig, database, statsTracker, pickerAPIKey, appID)
 
 		addr := fmt.Sprintf("%s:%d", httpHost, httpPort)
 		logging.Info("starting go-stats-tracker server", "host", httpHost, "port", httpPort)
