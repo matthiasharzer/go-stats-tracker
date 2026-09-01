@@ -46,6 +46,11 @@ func Handler(sharedState *auth.SharedState, oauth oauth2.Config, pickerAPIKEy st
 			return
 		}
 
+		if token.RefreshToken == "" {
+			http.Error(w, "No refresh token returned. Try revoking app permissions and trying again.", http.StatusBadRequest)
+			return
+		}
+
 		sharedState.SetRefreshToken(state, token.RefreshToken)
 
 		templateData := TemplateData{

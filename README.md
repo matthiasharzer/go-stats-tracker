@@ -9,7 +9,7 @@ A personal user XP tracker based on screenshots using Tesseract.
 
 ### Google Cloud Setup
 
-This project saves gathered data into a Google Spreadsheet. It requires the Sheets, Drive and Picker API to modify user selected spreadsheets. Therefore, a OAuth Client for user-file-access and API key is needed.
+This project saves gathered data into a Google Spreadsheet. It requires the Sheets, Drive and Picker API to modify user selected spreadsheets. Therefore, an OAuth Client for user-file-access and API key is needed.
 
 #### Create a Google Cloud OAuth 2.0 Client
 
@@ -107,15 +107,15 @@ Command line arguments:
 
 The server exposes the following endpoints:
 
-| Endpoint                    | Method | Params / Payload    | Authentication       | Description                                                                                                                                                                 |
-|-----------------------------|--------|---------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `/api/v1/health`            | GET    |                     |                      | Check the health of the server                                                                                                                                              |
-| `/api/v1/submit/{sheet_id}` | POST   | _(screenshot data)_ | Bearer authenication | Submits a new screenshot and populates the spreadsheet (`sheet_id`). Authentication is handled by the access token provided via the `Authorization: Bearer <token>` header. |
-| `/api/v1/auth/register`     | GET    |                     |                      | Register a new sheet to populate. Will trigger the OAuth flow to authenticate with your Google account. Returns a unique user ID which is used to authenticate later on     |
-| `/api/v1/auth/callback`     | GET    |                     |                      | The OAuth callback endpoint. Will be redirected to after authenticating with Google when registering.                                                                       |
-| `/api/v1/auth/link`         | POST   |                     |                      | Links a user selected spreadsheet.                                                                                                                                          |
+| Endpoint                    | Method | Params / Payload    | Authentication        | Description                                                                                                                                                                                 |
+|-----------------------------|--------|---------------------|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/api/v1/health`            | GET    |                     |                       | Check the health of the server                                                                                                                                                              |
+| `/api/v1/submit/{sheet_id}` | POST   | _(screenshot data)_ | Bearer authentication | Submits a new screenshot and populates the spreadsheet (`sheet_id`). Authentication is handled by the access token provided via the `Authorization: Bearer <token>` header.                 |
+| `/api/v1/auth/register`     | GET    |                     |                       | Starts the OAuth flow for spreadsheet access. After authorizing via Google and selecting and linking a spreadsheet, a access key will be generated used for authentication when submitting. |
+| `/api/v1/auth/callback`     | GET    |                     |                       | The OAuth callback endpoint. Will be redirected to after authenticating with Google when registering.                                                                                       |
+| `/api/v1/auth/link`         | POST   |                     |                       | Links a user selected spreadsheet.                                                                                                                                                          |
 
-To use the tool, go the `/api/v1/auth/register` URL in your browser and follow the steps to authorize access to a spreadsheet.
+To use the tool, navigate to the `/api/v1/auth/register` URL in your browser and follow the steps to authorize access to a spreadsheet.
 
 ### Spreadsheet Template
 

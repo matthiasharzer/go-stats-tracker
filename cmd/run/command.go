@@ -1,6 +1,7 @@
 package run
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -73,7 +74,7 @@ var Command = &cobra.Command{
 
 		pickerAPIKey, appID, err := getFilePickerCredentials()
 		if err != nil {
-			return fmt.Errorf("failed to get file picker API key: %w", err)
+			return fmt.Errorf("failed to get file picker credentials: %w", err)
 		}
 
 		database, err := sqlite.NewDatabase(dbFile)
@@ -83,7 +84,9 @@ var Command = &cobra.Command{
 
 		statsTracker := tracker.NewStatsTracker(tesseract.NewAnalyzer, database, *oauthConfig)
 
-		mux := getMux(*oauthConfig, database, statsTracker, pickerAPIKey, appID)
+		appContext, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		mux := getMux(appContext, *oauthConfig, database, statsTracker, pickerAPIKey, appID)
 
 		addr := fmt.Sprintf("%s:%d", httpHost, httpPort)
 		logging.Info("starting go-stats-tracker server", "host", httpHost, "port", httpPort)

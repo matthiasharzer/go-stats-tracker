@@ -1,6 +1,7 @@
 package run
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/matthiasharzer/go-stats-tracker/api/v1/auth"
@@ -13,8 +14,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func getMux(oauth oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker, pickerAPIKey string, appID string) *http.ServeMux {
-	sharedState := auth.NewSharedState()
+func getMux(ctx context.Context, oauth oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker, pickerAPIKey string, appID string) *http.ServeMux {
+	sharedState := auth.NewSharedState(ctx)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/health", func(w http.ResponseWriter, r *http.Request) {

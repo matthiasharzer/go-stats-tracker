@@ -13,10 +13,14 @@ func Handler(sharedState *auth.SharedState, oauth oauth2.Config) http.HandlerFun
 	return func(w http.ResponseWriter, r *http.Request) {
 		accessKey := stringutils.RandomString(48)
 
-		stateID := sharedState.NewStateID(accessKey)
+		stateID, err := sharedState.NewStateID(accessKey)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		authURL := oauth.AuthCodeURL(stateID, oauth2.AccessTypeOffline, oauth2.ApprovalForce)
 
-		logging.Info("requesting access", "state_id", stateID)
+		logging.Info("requesting access")
 
 		http.Redirect(w, r, authURL, http.StatusTemporaryRedirect)
 	}
