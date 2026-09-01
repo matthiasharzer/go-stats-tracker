@@ -53,10 +53,11 @@
 				})
 					.then(response => {
 						if (response.ok) {
+							const apiURL = `${window.location.origin}/api/v1/submit/${documentId}`;
 							document.getElementById('showPickerBtn').style.display = 'none';
 							document.getElementById('successContainer').style.display = 'block';
 							document.getElementById('accessToken').textContent = userAccessKey;
-							document.getElementById('apiUrl').textContent = `/api/v1/submit/${documentId}`;
+							document.getElementById('apiUrl').textContent = apiURL;
 						}
 					});
 			}
