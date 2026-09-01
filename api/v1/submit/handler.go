@@ -52,7 +52,7 @@ func Handler(database persistence.Database, tracker *tracker.StatsTracker) http.
 			return
 		}
 		if sheetContext == nil {
-			logging.Debug("sheet not found", "userID", sheetID)
+			logging.Debug("sheet not found", "sheet_id", sheetID)
 			http.Error(w, "sheet not found", http.StatusNotFound)
 			return
 		}
@@ -90,7 +90,7 @@ func Handler(database persistence.Database, tracker *tracker.StatsTracker) http.
 		w.WriteHeader(http.StatusOK)
 		_, err = w.Write([]byte("OK"))
 		if err != nil {
-			logging.Error("failed to write response", "error", err, "userID", sheetID)
+			logging.Error("failed to write response", "error", err, "sheet_id", sheetID)
 		}
 	}
 }
