@@ -40,29 +40,30 @@ func Handler(database persistence.Database, tracker *tracker.StatsTracker) http.
 
 		bearerToken, err := extractBearerToken(r)
 		if err != nil {
-			logging.Debug("failed to extract bearer token", "error", err, "sheet_id", sheetID)
+			logging.Info("failed to extract bearer token", "error", err, "sheet_id", sheetID)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		sheetContext, err := database.Lookup(bearerToken)
 		if err != nil {
-			logging.Debug("failed to lookup sheet context", "error", err, "sheet_id", sheetID)
+			logging.Info("failed to lookup sheet context", "error", err, "sheet_id", sheetID)
 			http.Error(w, "failed to lookup sheet context", http.StatusInternalServerError)
 			return
 		}
 		if sheetContext == nil {
+			logging.Info("unauthorized access attempt", "sheet_id", sheetID)
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
 		if sheetContext.TargetSpreadsheetID != sheetID {
-			logging.Debug("sheet id mismatch", "sheet_id", sheetID, "target_spreadsheet_id", sheetContext.TargetSpreadsheetID)
+			logging.Info("sheet id mismatch", "sheet_id", sheetID, "target_spreadsheet_id", sheetContext.TargetSpreadsheetID)
 			http.Error(w, "sheet id mismatch", http.StatusUnauthorized)
 			return
 		}
 
 		if r.Body == nil {
-			logging.Debug("missing request body in request", "sheet_id", sheetID)
+			logging.Info("missing request body in request", "sheet_id", sheetID)
 			http.Error(w, "missing request body", http.StatusBadRequest)
 			return
 		}
