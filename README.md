@@ -7,7 +7,11 @@ A personal user XP tracker based on screenshots using Tesseract.
 
 ## Setup
 
-### Create a Google Cloud OAuth 2.0 Client
+### Google Cloud Setup
+
+This project saves gathered data into a Google Spreadsheet. It requires the Sheets, Drive and Picker API to modify user selected spreadsheets. Therefore, a OAuth Client for user-file-access and API key is needed.
+
+#### Create a Google Cloud OAuth 2.0 Client
 
 This project connects to the Google Sheets API using OAuth 2.0. To use it, you need to create a Google Cloud project and set up an OAuth 2.0 client.
 1. Create a project in the [Google Cloud Console](https://console.cloud.google.com/).
@@ -20,14 +24,14 @@ This project connects to the Google Sheets API using OAuth 2.0. To use it, you n
    - [Google Picker API](https://console.cloud.google.com/marketplace/product/google/picker.googleapis.com)
 6. Add the `https://www.googleapis.com/auth/drive.file` scope to your OAuth consent screen by navigating to "APIs & Services" > "OAuth consent screen" > "Data Access".
 
-### Create an API key for the Google Picker API 
+#### Create an API key for the Google Picker API 
 
 1. Navigate to "APIs & Services" > "Credentials" and click "Create Credentials" > "API Key".
 2. Select the "Google Picker API".
 3. (Optionally) Further restrict the API key.
 4. Click create and note down the API key for later
 
-### Gather the App ID
+#### Gather the App ID
 
  The app ID is required for the Google Picker API and is part of the authorization chain to access a user's files
 
