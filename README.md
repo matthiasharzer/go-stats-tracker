@@ -12,21 +12,41 @@ A personal user XP tracker based on screenshots using Tesseract.
 This project connects to the Google Sheets API using OAuth 2.0. To use it, you need to create a Google Cloud project and set up an OAuth 2.0 client.
 1. Create a project in the [Google Cloud Console](https://console.cloud.google.com/).
 2. Navigate to "APIs & Services" > "Credentials" and click "Create Credentials" > "OAuth client ID".
-3. Select "Web application" as the application type and set the redirect URI to `<YOUR_REDIRECT_URL>/api/v1/callback`.
+3. Select "Web application" as the application type and set the redirect URI to `<YOUR_REDIRECT_URL>/api/v1/auth/callback`.
 4. Note down the `Client ID` and `Client Secret` for later use.
-5. Enable the Google Sheets API for your project by navigating to "APIs & Services" > "Library" and searching for "Google Sheets API". Click "Enable".
-6. Add the `https://www.googleapis.com/auth/spreadsheets` scope to your OAuth consent screen by navigating to "APIs & Services" > "OAuth consent screen" > "Data Access".
+5. Enable the following APIs, navigating to "APIs & Services" > "Library":
+   - [Google Sheets API](https://console.cloud.google.com/marketplace/product/google/sheets.googleapis.com)
+   - [Google Drive API](https://console.cloud.google.com/marketplace/product/google/drive.googleapis.com)
+   - [Google Picker API](https://console.cloud.google.com/marketplace/product/google/picker.googleapis.com)
+6. Add the `https://www.googleapis.com/auth/drive.file` scope to your OAuth consent screen by navigating to "APIs & Services" > "OAuth consent screen" > "Data Access".
+
+### Create an API key for the Google Picker API 
+
+1. Navigate to "APIs & Services" > "Credentials" and click "Create Credentials" > "API Key".
+2. Select the "Google Picker API".
+3. (Optionally) Further restrict the API key.
+4. Click create and note down the API key for later
+
+### Gather the App ID
+
+ The app ID is required for the Google Picker API and is part of the authorization chain to access a user's files
+
+1. Navigate to "IAM & Admin" > "Settings"
+2. Copy the "Project number", which is referred to as the App ID
+
 
 ### Docker (recommended)
 
 The easiest way to run the application is with Docker. A pre-built image is available on the [GitHub Container Registry](https://ghcr.io/matthiasharzer/go-stats-tracker).
 
 
-Create an `.env` file with the following content, using the `Client ID`, `Client Secret`, and redirect URL you obtained from the Google Cloud Console:
+Create an `.env` file with the following content, using the `Client ID`, `Client Secret`, `Picker API Key`, `App ID`, and redirect URL you obtained from the Google Cloud Console:
 ```env
-REDIRECT_URL=<YOUR_REDIRECT_URL>/api/v1/callback
+REDIRECT_URL=<YOUR_REDIRECT_URL>/api/v1/auth/callback
 CLIENT_ID=<YOUR_CLIENT_ID>
 CLIENT_SECRET=<YOUR_CLIENT_SECRET>
+APP_ID=<YOUR_APP_ID>
+PICKER_API_KEY=<YOUR_FILE_PICKER_API_KEY>
 ```
 
 Run the following command to start the application on port 4000:
@@ -68,6 +88,8 @@ Requires the following environment variables to be set:
 - `REDIRECT_URL`: The redirect URL for the OAuth 2.0 client. This must match exactly the URL configured in the Google Cloud Console.
 - `CLIENT_ID`: The client ID for the OAuth 2.0 client.
 - `CLIENT_SECRET`: The client secret for the OAuth 2.0 client.
+- `APP_ID`: The unique [app ID from the GCP-project](https://console.cloud.google.com/iam-admin/settings), where it is referred to as "Project number"
+- `PICKER_API_KEY`: The API key used by the Google Picker API.
 
 Command line arguments:
 
@@ -81,13 +103,15 @@ Command line arguments:
 
 The server exposes the following endpoints:
 
-| Endpoint                   | Method | Params / Payload    | Description                                                                                                                                                             |
-|----------------------------|--------|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `/api/v1/health`           | GET    |                     | Check the health of the server                                                                                                                                          |
-| `/api/v1/register`         | GET    | `sheet_id`          | Register a new sheet to populate. Will trigger the OAuth flow to authenticate with your Google account. Returns a unique user ID which is used to authenticate later on |
-| `/api/v1/callback`         | GET    |                     | The OAuth callback endpoint                                                                                                                                             |
-| `/api/v1/ingest/{user-id}` | POST   | _(screenshot data)_ | Submits a new screenshot. Authentication is handled by the user ID which resolves to the prior configured sheet ID                                                      |
+| Endpoint                    | Method | Params / Payload    | Authentication       | Description                                                                                                                                                                 |
+|-----------------------------|--------|---------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `/api/v1/health`            | GET    |                     |                      | Check the health of the server                                                                                                                                              |
+| `/api/v1/submit/{sheet_id}` | POST   | _(screenshot data)_ | Bearer authenication | Submits a new screenshot and populates the spreadsheet (`sheet_id`). Authentication is handled by the access token provided via the `Authorization: Bearer <token>` header. |
+| `/api/v1/auth/register`     | GET    |                     |                      | Register a new sheet to populate. Will trigger the OAuth flow to authenticate with your Google account. Returns a unique user ID which is used to authenticate later on     |
+| `/api/v1/auth/callback`     | GET    |                     |                      | The OAuth callback endpoint. Will be redirected to after authenticating with Google when registering.                                                                       |
+| `/api/v1/auth/link`         | POST   |                     |                      | Links a user selected spreadsheet.                                                                                                                                          |
 
+To use the tool, go the `/api/v1/auth/register` URL in your browser and follow the steps to authorize access to a spreadsheet.
 
 ### Spreadsheet Template
 
