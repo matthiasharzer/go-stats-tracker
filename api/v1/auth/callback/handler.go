@@ -20,7 +20,7 @@ type TemplateData struct {
 	State         string
 }
 
-func Handler(sharedState *auth.SharedState, oauth oauth2.Config, filePickerDeveloperKey string, filePickerAppID string) http.HandlerFunc {
+func Handler(sharedState *auth.SharedState, oauth oauth2.Config, pickerAPIKEy string, appID string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		state := r.FormValue("state")
 		if state == "" {
@@ -49,8 +49,8 @@ func Handler(sharedState *auth.SharedState, oauth oauth2.Config, filePickerDevel
 		sharedState.SetRefreshToken(state, token.RefreshToken)
 
 		templateData := TemplateData{
-			DeveloperKey:  filePickerDeveloperKey,
-			AppID:         filePickerAppID,
+			DeveloperKey:  pickerAPIKEy,
+			AppID:         appID,
 			AccessToken:   token.AccessToken,
 			State:         state,
 			UserAccessKey: userAccessKey,

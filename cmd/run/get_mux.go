@@ -13,7 +13,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func getMux(oauth oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker, filePickerAPIKey string, filePickerAppID string) *http.ServeMux {
+func getMux(oauth oauth2.Config, database persistence.Database, tracker *tracker.StatsTracker, pickerAPIKey string, appID string) *http.ServeMux {
 	sharedState := auth.NewSharedState()
 
 	mux := http.NewServeMux()
@@ -23,7 +23,7 @@ func getMux(oauth oauth2.Config, database persistence.Database, tracker *tracker
 	})
 
 	mux.HandleFunc("GET /api/v1/auth/register", register.Handler(sharedState, oauth))
-	mux.HandleFunc("GET /api/v1/auth/callback", callback.Handler(sharedState, oauth, filePickerAPIKey, filePickerAppID))
+	mux.HandleFunc("GET /api/v1/auth/callback", callback.Handler(sharedState, oauth, pickerAPIKey, appID))
 	mux.HandleFunc("POST /api/v1/auth/link", link.Handler(sharedState, database))
 	mux.HandleFunc("POST /api/v1/submit/{sheetID}", submit.Handler(database, tracker))
 
