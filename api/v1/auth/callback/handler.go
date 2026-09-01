@@ -62,6 +62,10 @@ func Handler(sharedState *auth.SharedState, oauth oauth2.Config, pickerAPIKEy st
 		}
 
 		tmpl := template.Must(template.New("index").Parse(templateHTML))
+
+		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Set("Pragma", "no-cache")
+
 		err = tmpl.Execute(w, templateData)
 		if err != nil {
 			http.Error(w, "Failed to execute template: "+err.Error(), http.StatusInternalServerError)
