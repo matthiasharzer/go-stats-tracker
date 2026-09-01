@@ -43,7 +43,7 @@
 			if (data.action === google.picker.Action.PICKED) {
 				const documentId = data.docs[0].id;
 
-				fetch('/api/v1/link', {
+				fetch('/api/v1/auth/link', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify({
@@ -158,9 +158,9 @@
 </div>
 <div class="container" id="successContainer">
 	<h2>Success!</h2>
-	<p>You access token is <code id="accessToken">aslkhjsdkljh</code></p>
+	<p>You access token is <code id="accessToken"></code></p>
 	<p>Use it to authenticate against the API.</p>
-	<p>Spreadsheet API URL: <code id="apiUrl">/api/v1/ingest/öaliosjföiodspf</code></p>
+	<p>Spreadsheet API URL: <code id="apiUrl"></code></p>
 </div>
 <button class="container" onclick="showPicker()" id="showPickerBtn">
 	Show file picker

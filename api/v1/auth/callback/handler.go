@@ -22,20 +22,6 @@ type TemplateData struct {
 
 func Handler(sharedState *auth.SharedState, oauth oauth2.Config, filePickerDeveloperKey string, filePickerAppID string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		templateData2 := TemplateData{
-			DeveloperKey:  filePickerDeveloperKey,
-			AppID:         filePickerAppID,
-			AccessToken:   "token.AccessToken",
-			State:         "state",
-			UserAccessKey: "userAccessKey",
-		}
-		tmpl2 := template.Must(template.New("index").Parse(templateHTML))
-		err2 := tmpl2.Execute(w, templateData2)
-		if err2 != nil {
-			http.Error(w, "Failed to execute template: "+err2.Error(), http.StatusInternalServerError)
-			return
-		}
-		return
 		state := r.FormValue("state")
 		if state == "" {
 			http.Error(w, "State is empty", http.StatusBadRequest)
