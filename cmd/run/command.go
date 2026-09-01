@@ -39,12 +39,17 @@ func getGoogleOauthConfig() (*oauth2.Config, error) {
 	}, nil
 }
 
-func getFilePickerAPIKey() (string, error) {
-	apiKey := os.Getenv("FILE_PICKER_API_KEY")
+func getFilePickerCredentials() (apiKey string, appId string, err error) {
+	apiKey = os.Getenv("FILE_PICKER_API_KEY")
 	if apiKey == "" {
-		return "", fmt.Errorf("FILE_PICKER_API_KEY is not set")
+		return "", "", fmt.Errorf("FILE_PICKER_API_KEY is not set")
 	}
-	return apiKey, nil
+	appId = os.Getenv("FILE_PICKER_APP_ID")
+	if appId == "" {
+		return "", "", fmt.Errorf("FILE_PICKER_APP_ID is not set")
+	}
+
+	return apiKey, appId, nil
 }
 
 var httpPort int
@@ -66,7 +71,7 @@ var Command = &cobra.Command{
 			return fmt.Errorf("failed to get oauth config: %w", err)
 		}
 
-		filePickerAPIKey, err := getFilePickerAPIKey()
+		filePickerDeveloperKey, filePickerAppId, err := getFilePickerCredentials()
 		if err != nil {
 			return fmt.Errorf("failed to get file picker API key: %w", err)
 		}
@@ -78,7 +83,7 @@ var Command = &cobra.Command{
 
 		statsTracker := tracker.NewStatsTracker(tesseract.NewAnalyzer, database, *oauthConfig)
 
-		mux := getMux(*oauthConfig, database, statsTracker, filePickerAPIKey)
+		mux := getMux(*oauthConfig, database, statsTracker, filePickerDeveloperKey, filePickerAppId)
 
 		addr := fmt.Sprintf("%s:%d", httpHost, httpPort)
 		logging.Info("starting go-stats-tracker server", "host", httpHost, "port", httpPort)

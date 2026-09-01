@@ -3,13 +3,13 @@ package register
 import (
 	"net/http"
 
-	"github.com/matthiasharzer/go-stats-tracker/api"
+	"github.com/matthiasharzer/go-stats-tracker/api/v1/auth"
 	"github.com/matthiasharzer/go-stats-tracker/logging"
 	"github.com/matthiasharzer/go-stats-tracker/utils/stringutils"
 	"golang.org/x/oauth2"
 )
 
-func Handler(sharedState *api.SharedState, oauth oauth2.Config) http.HandlerFunc {
+func Handler(sharedState *auth.SharedState, oauth oauth2.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		accessKey := stringutils.RandomString(48)
 

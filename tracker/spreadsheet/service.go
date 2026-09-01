@@ -208,11 +208,11 @@ func (s *Service) resolveUpdateContext(rows []row, date time.Time) (updateContex
 	}, nil
 }
 
-func (s *Service) AppendStats(userContext persistence.SheetContext, stats analyzer.PlayerStats, date time.Time) error {
+func (s *Service) AppendStats(sheetContext persistence.SheetContext, stats analyzer.PlayerStats, date time.Time) error {
 	ctx := context.Background()
 
 	token := &oauth2.Token{
-		RefreshToken: userContext.GoogleRefreshToken,
+		RefreshToken: sheetContext.GoogleRefreshToken,
 		TokenType:    "Bearer",
 	}
 
@@ -223,7 +223,7 @@ func (s *Service) AppendStats(userContext persistence.SheetContext, stats analyz
 		return fmt.Errorf("unable to retrieve Sheets client: %v", err)
 	}
 
-	rows, err := s.parseExistingRows(srv, userContext.TargetSpreadsheetID)
+	rows, err := s.parseExistingRows(srv, sheetContext.TargetSpreadsheetID)
 	if err != nil {
 		return fmt.Errorf("failed to parse existing rows: %w", err)
 	}
@@ -241,8 +241,8 @@ func (s *Service) AppendStats(userContext persistence.SheetContext, stats analyz
 		logging.Warn("player stats do not include level, using default player level", "defaultPlayerLevel", playerLevel)
 	}
 
-	logging.Info("writing row", "spreadsheetID", userContext.TargetSpreadsheetID, "date", dateCell.value.Format("2006-01-02"), "dateCell", dateCell.format(), "level", playerLevel, "xp", stats.GainedLevelXP)
-	err = s.setRow(srv, userContext.TargetSpreadsheetID, dateCell, playerLevel, stats.GainedLevelXP)
+	logging.Info("writing row", "spreadsheetID", sheetContext.TargetSpreadsheetID, "date", dateCell.value.Format("2006-01-02"), "dateCell", dateCell.format(), "level", playerLevel, "xp", stats.GainedLevelXP)
+	err = s.setRow(srv, sheetContext.TargetSpreadsheetID, dateCell, playerLevel, stats.GainedLevelXP)
 	if err != nil {
 		return fmt.Errorf("failed to set row: %w", err)
 	}

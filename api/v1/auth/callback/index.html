@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Select Spreadsheet</title>
+	<script src="https://apis.google.com/js/api.js"></script>
+	<script>
+		const developerKey = '{{.DeveloperKey}}';
+		const appId = '{{.AppID}}';
+
+		const accessToken = '{{.AccessToken}}';
+		const userAccessKey = '{{.UserAccessKey}}';
+		const state = '{{.State}}';
+
+		let picker;
+
+		function loadPicker() {
+			gapi.load('picker', { 'callback': onPickerApiLoad });
+		}
+
+		function onPickerApiLoad() {
+			const view = new google.picker.DocsView(google.picker.ViewId.SPREADSHEETS)
+				.setMimeTypes('application/vnd.google-apps.spreadsheet');
+
+			picker = new google.picker.PickerBuilder()
+				.addView(view)
+				.setAppId(appId)
+				.setDeveloperKey(developerKey)
+				.setOAuthToken(accessToken)
+				.setCallback(pickerCallback)
+				.enableFeature(google.picker.Feature.MINE_ONLY)
+				.build();
+
+			picker.setVisible(true);
+		}
+
+		function showPicker() {
+			if (picker) {
+				picker.setVisible(true);
+			}
+		}
+
+		function pickerCallback(data) {
+			if (data.action === google.picker.Action.PICKED) {
+				const documentId = data.docs[0].id;
+
+				fetch('/api/v1/link', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({
+						sheet_id: documentId,
+						state: state,
+					})
+				})
+					.then(response => {
+						if (response.ok) {
+							document.getElementById('showPickerBtn').style.display = 'none';
+							document.getElementById('successContainer').style.display = 'block';
+							document.getElementById('accessToken').textContent = userAccessKey;
+							document.getElementById('apiUrl').textContent = `/api/v1/ingest/${documentId}`;
+						}
+					});
+			}
+		}
+	</script>
+
+	<style>
+		:root {
+			--ball: url("data:image/svg+xml,%3Csvg width='750' height='750' viewBox='0 0 750 750' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='375' cy='375' r='62' fill='%234C4C4C'/%3E%3Cmask id='mask0_292_341' style='mask-type:alpha' maskUnits='userSpaceOnUse' x='193' y='193' width='364' height='364'%3E%3Cg clip-path='url(%23clip0_292_341)'%3E%3Crect width='364' height='165' transform='translate(193 193)' fill='white'/%3E%3Crect width='364' height='165' transform='translate(193 392)' fill='white'/%3E%3C/g%3E%3C/mask%3E%3Cg mask='url(%23mask0_292_341)'%3E%3Cpath d='M522 375C522 456.186 456.186 522 375 522C293.814 522 228 456.186 228 375C228 293.814 293.814 228 375 228C456.186 228 522 293.814 522 375ZM291.799 375C291.799 420.951 329.049 458.201 375 458.201C420.951 458.201 458.201 420.951 458.201 375C458.201 329.049 420.951 291.799 375 291.799C329.049 291.799 291.799 329.049 291.799 375Z' fill='%234C4C4C'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='clip0_292_341'%3E%3Crect width='364' height='364' fill='white' transform='translate(193 193)'/%3E%3C/clipPath%3E%3C/defs%3E%3C/svg%3E");
+		}
+
+		body {
+			position: relative;
+			margin: 0;
+			padding: 0;
+			font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+			-webkit-font-smoothing: antialiased;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			height: 100dvh;
+
+		}
+
+		.background {
+			position: fixed;
+			background-color: #fff1e8;
+			top: 0;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			overflow: hidden;
+			z-index: -1;
+		}
+
+		.overlay {
+			position: absolute;
+
+			top: -50%;
+			left: -50%;
+			width: 200%;
+			height: 200%;
+
+			background-image:
+				var(--ball),
+				var(--ball);
+			background-size: 80px 80px, 80px 80px;
+			background-position: 0 0, 40px 	40px;
+			background-repeat: repeat, repeat;
+			transform: rotate(-25deg);
+			opacity: 0.2;
+		}
+
+		.container {
+			position: relative;
+			background-color: #c6a1ff;
+			border: 3px solid black;
+			box-shadow: 4px 4px 0px black;
+			padding: 1rem;
+			transition: box-shadow 0.05s ease-in-out, transform 0.05s ease-in-out, background-color 0.05s ease-in-out;
+
+			h2 {
+				margin: 0 0 1rem 0;
+			}
+
+			code {
+				background-color: #fff;
+				padding: 0.2rem 0.4rem;
+				border-radius: 4px;
+			}
+
+		}
+
+		button {
+			font-size: 1.1rem;
+			font-weight: bold;
+
+			&:hover {
+				cursor: pointer;
+				background-color: #b38fff;
+				box-shadow: 6px 6px 0px black;
+				transform: translate(-2px, -2px);
+			}
+			&:active {
+				box-shadow: 0px 0px 0px black;
+				transform: translate(4px, 4px);
+			}
+		}
+
+		#successContainer {
+			display: none;
+		}
+	</style>
+</head>
+<body onload="loadPicker()">
+<div class="background">
+	<div class="overlay"></div>
+</div>
+<div class="container" id="successContainer">
+	<h2>Success!</h2>
+	<p>You access token is <code id="accessToken">aslkhjsdkljh</code></p>
+	<p>Use it to authenticate against the API.</p>
+	<p>Spreadsheet API URL: <code id="apiUrl">/api/v1/ingest/öaliosjföiodspf</code></p>
+</div>
+<button class="container" onclick="showPicker()" id="showPickerBtn">
+	Show file picker
+</button>
+</body>
+</html>
