@@ -52,8 +52,7 @@ func Handler(database persistence.Database, tracker *tracker.StatsTracker) http.
 			return
 		}
 		if sheetContext == nil {
-			logging.Debug("sheet not found", "sheet_id", sheetID)
-			http.Error(w, "sheet not found", http.StatusNotFound)
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
 		if sheetContext.TargetSpreadsheetID != sheetID {
