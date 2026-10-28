@@ -10,7 +10,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/oauth2 v0.37.0
-	google.golang.org/api v0.303.0
+	google.golang.org/api v0.306.0
 	modernc.org/sqlite v1.60.1
 )
 
@@ -48,7 +48,7 @@ require (
 	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/tools v0.51.0 // indirect
 	golang.org/x/tools/go/expect v0.1.1-deprecated // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261005182115-fad411399dd8 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261019180522-ce908d29299b // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	honnef.co/go/tools v0.6.1 // indirect
